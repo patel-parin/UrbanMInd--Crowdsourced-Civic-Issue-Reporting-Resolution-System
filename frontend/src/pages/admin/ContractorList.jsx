@@ -3,7 +3,8 @@ import { Users, Plus } from 'lucide-react';
 import Card from '../../components/common/Card';
 import Button from '../../components/common/Button';
 import Loader from '../../components/common/Loader';
-import { userService } from '../../api/services';
+import { adminService } from '../../api/services/adminService';
+
 
 const ContractorList = () => {
     const [contractors, setContractors] = useState([]);
@@ -12,7 +13,7 @@ const ContractorList = () => {
     useEffect(() => {
         const fetchContractors = async () => {
             try {
-                const data = await userService.getContractors();
+                const data = await adminService.getContractors();
                 setContractors(data);
             } catch (error) {
                 console.error('Failed to fetch contractors:', error);

@@ -5,7 +5,7 @@ import Card from '../../components/common/Card';
 import Input from '../../components/common/Input';
 import Button from '../../components/common/Button';
 import Loader from '../../components/common/Loader';
-import { issueService } from '../../api/services';
+import { issueService } from '../../api/services/issueService';
 
 const IssueList = () => {
     const [issues, setIssues] = useState([]);

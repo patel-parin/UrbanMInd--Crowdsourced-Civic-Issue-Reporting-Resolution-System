@@ -3,7 +3,8 @@ import { motion } from 'framer-motion';
 import { Users, AlertCircle, CheckCircle, Clock } from 'lucide-react';
 import Card from '../../components/common/Card';
 import Loader from '../../components/common/Loader';
-import { dashboardService } from '../../api/services';
+import { dashboardService } from '../../api/services/dashboardService';
+
 
 const AdminDashboard = () => {
     const [stats, setStats] = useState({
