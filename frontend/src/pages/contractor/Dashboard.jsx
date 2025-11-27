@@ -5,7 +5,7 @@ import Card from '../../components/common/Card';
 import Button from '../../components/common/Button';
 import Loader from '../../components/common/Loader';
 import toast from 'react-hot-toast';
-import { issueService } from '../../api/services';
+import { issueService } from '../../api/services/issueService';
 
 const ContractorDashboard = () => {
     const [tasks, setTasks] = useState([]);
