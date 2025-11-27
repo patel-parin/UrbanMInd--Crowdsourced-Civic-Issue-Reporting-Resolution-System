@@ -12,7 +12,10 @@ const Register = () => {
     const navigate = useNavigate();
     const { register } = useAuth();
 
-    const role = location.state?.role || 'citizen';
+    // Prevent admin registration via URL manipulation
+    const role = (location.state?.role === 'admin' || location.state?.role === 'superadmin')
+        ? 'citizen'
+        : (location.state?.role || 'citizen');
 
     const [formData, setFormData] = useState({
         name: '',
