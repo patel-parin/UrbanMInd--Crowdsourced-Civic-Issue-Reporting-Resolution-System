@@ -1,0 +1,49 @@
+# Dependency directories
+node_modules/
+vendor/
+target/ # For Java/Scala projects
+
+# Environment variables and configuration
+.env
+.env.*
+config/local.js
+config/development.js
+config/*.local
+
+# Build artifacts and compiled files
+*.log
+*.tmp
+*.bak
+*.swp
+*.swo
+*.pyc # Python compiled files
+__pycache__/ # Python cache directory
+build/
+dist/
+out/
+bin/
+
+# IDE and OS specific files
+.idea/ # IntelliJ IDEA
+.vscode/ # VS Code
+.DS_Store # macOS
+Thumbs.db # Windows
+*.iml # IntelliJ IDEA module files
+
+# Test reports and coverage
+coverage/
+.nyc_output/
+
+# Database files
+*.sqlite
+*.db
+data/*.sqlite
+data/*.db
+
+# Uploaded files or sensitive data (if not handled elsewhere)
+uploads/
+private/
+
+# Other temporary files
+temp/
+tmp/
