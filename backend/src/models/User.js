@@ -13,7 +13,8 @@ const userSchema = new mongoose.Schema(
     },
     city: { type: String }, // For City Admins
     isSuperAdmin: { type: Boolean, default: false },
-    points: { type: Number, default: 0 },
+    impactPoints: { type: Number, default: 0 },
+citizenLevel: { type: Number, default: 1 },
   },
   { timestamps: true }
 );

@@ -9,9 +9,19 @@ const issueSchema = new mongoose.Schema(
     imageUrl: String,
     status: {
       type: String,
-      enum: ["reported", "in_review", "assigned", "in_progress", "resolved"],
+      enum: [
+        "reported",
+        "assigned",
+        "under_contractor_survey",
+        "under_contractor",
+        "fund_approval_pending",
+        "in_progress",
+        "resolved"
+      ],
       default: "reported",
     },
+    fundAmount: { type: Number, default: 0 },
+    fundApproved: { type: Boolean, default: false },
     category: String,
     gps: {
       lat: Number,
