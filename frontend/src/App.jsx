@@ -24,12 +24,13 @@ import Analytics from './pages/admin/Analytics';
 import SuperAdminDashboard from './pages/admin/SuperAdminDashboard';
 
 import ContractorDashboard from './pages/contractor/Dashboard';
+import CompletedTasks from './pages/contractor/CompletedTasks';
 
 function App() {
   return (
     <Router>
       <AuthProvider>
-        <div className="min-h-screen bg-gray-900 text-white font-sans">
+        <div className="min-h-screen text-white font-sans">
           <Toaster position="top-right" />
           <Routes>
             {/* Public Routes */}
@@ -99,7 +100,8 @@ function App() {
                   <Layout>
                     <Routes>
                       <Route path="dashboard" element={<ContractorDashboard />} />
-                      <Route path="tasks" element={<ContractorDashboard />} /> {/* Reusing dashboard for now as it has tasks */}
+                      <Route path="tasks" element={<ContractorDashboard />} />
+                      <Route path="completed" element={<CompletedTasks />} />
                       <Route path="*" element={<Navigate to="dashboard" replace />} />
                     </Routes>
                   </Layout>
