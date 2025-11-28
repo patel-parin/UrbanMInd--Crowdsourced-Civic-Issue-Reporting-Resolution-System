@@ -44,41 +44,57 @@ const RoleSelect = () => {
     };
 
     return (
-        <div className="min-h-screen flex flex-col items-center justify-center p-4 bg-linear-to-br from-gray-900 via-gray-800 to-gray-900">
+        <div className="min-h-screen flex flex-col items-center justify-center p-4 relative overflow-hidden">
+            {/* Background Elements */}
+            <div className="absolute inset-0 bg-linear-to-br from-slate-900 via-indigo-950 to-slate-900" />
+            <div className="absolute top-[-10%] left-[-10%] w-96 h-96 bg-indigo-500/20 rounded-full blur-3xl" />
+            <div className="absolute bottom-[-10%] right-[-10%] w-96 h-96 bg-purple-500/20 rounded-full blur-3xl" />
+
             <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.5 }}
-                className="text-center mb-12"
+                className="relative z-10 text-center mb-16"
             >
-                <h1 className="text-4xl md:text-5xl font-bold text-white mb-4">
-                    Welcome to <span className="text-blue-500">Urban Mind</span>
+                <h1 className="text-5xl md:text-6xl font-bold text-white mb-6 tracking-tight">
+                    Welcome to <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-indigo-400">Urban Mind</span>
                 </h1>
-                <p className="text-gray-400 text-lg max-w-2xl mx-auto">
+                <p className="text-slate-300 text-xl max-w-2xl mx-auto leading-relaxed">
                     Connecting citizens, contractors, and administrators for a better urban environment.
                     Select your role to continue.
                 </p>
             </motion.div>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-6xl w-full">
+            <div className="relative z-10 grid grid-cols-1 md:grid-cols-3 gap-8 max-w-7xl w-full px-4">
                 {roles.map((role, index) => (
                     <motion.div
                         key={role.id}
-                        initial={{ opacity: 0, y: 20 }}
+                        initial={{ opacity: 0, y: 30 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ duration: 0.5, delay: index * 0.1 }}
+                        className="h-full"
                     >
-                        <Card
-                            hover
+                        <div
                             onClick={() => handleRoleSelect(role.id)}
-                            className={`cursor-pointer h-full flex flex-col items-center text-center p-8 transition-colors border-gray-700 ${role.border}`}
+                            className={`
+                                group relative h-full flex flex-col items-center text-center p-8 
+                                bg-slate-800/40 backdrop-blur-xl border border-white/10 rounded-3xl
+                                hover:bg-slate-800/60 transition-all duration-300 cursor-pointer
+                                hover:shadow-2xl hover:shadow-indigo-500/10 hover:-translate-y-2
+                            `}
                         >
-                            <div className={`p-4 rounded-full mb-6 ${role.bg}`}>
+                            <div className={`
+                                p-6 rounded-2xl mb-6 transition-transform duration-300 group-hover:scale-110
+                                ${role.bg}
+                            `}>
                                 <role.icon className={`w-12 h-12 ${role.color}`} />
                             </div>
-                            <h3 className="text-2xl font-bold text-white mb-3">{role.title}</h3>
-                            <p className="text-gray-400">{role.description}</p>
-                        </Card>
+                            <h3 className="text-2xl font-bold text-white mb-4">{role.title}</h3>
+                            <p className="text-slate-400 text-lg leading-relaxed">{role.description}</p>
+
+                            {/* Hover Glow Effect */}
+                            <div className="absolute inset-0 rounded-3xl bg-gradient-to-r from-indigo-500/0 via-indigo-500/5 to-indigo-500/0 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                        </div>
                     </motion.div>
                 ))}
             </div>

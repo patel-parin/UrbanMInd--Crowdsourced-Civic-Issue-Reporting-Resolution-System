@@ -49,13 +49,13 @@ const Register = () => {
     };
 
     return (
-        <div className="min-h-screen flex items-center justify-center p-4 bg-linear-to-br from-gray-900 via-gray-800 to-gray-900">
-            <motion.div
-                initial={{ opacity: 0, scale: 0.95 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{ duration: 0.5 }}
-                className="w-full max-w-md"
-            >
+        <div className="fixed inset-0 w-screen h-screen flex items-center justify-center p-4 overflow-hidden bg-slate-900">
+            {/* Background Elements */}
+            <div className="absolute inset-0 bg-linear-to-br from-slate-900 via-indigo-950 to-slate-900" />
+            <div className="absolute top-[-10%] left-[-10%] w-96 h-96 bg-indigo-500/20 rounded-full blur-3xl" />
+            <div className="absolute bottom-[-10%] right-[-10%] w-96 h-96 bg-purple-500/20 rounded-full blur-3xl" />
+
+            <div className="relative z-10 w-full max-w-md">
                 <Button
                     variant="ghost"
                     size="sm"
@@ -143,7 +143,7 @@ const Register = () => {
                         </div>
                     </form>
                 </Card>
-            </motion.div>
+            </div>
         </div>
     );
 };
