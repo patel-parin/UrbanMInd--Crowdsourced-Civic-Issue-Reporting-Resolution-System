@@ -1,4 +1,5 @@
 import User from "../models/User.js";
+import Contractor from "../models/Contractor.js";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import keys from "../config/keys.js";
@@ -24,6 +25,17 @@ export const register = async (req, res) => {
       role: role || "citizen",
     });
 
+    if (role === "contractor") {
+      await Contractor.create({
+        companyName: name,
+        userId: user._id,
+        rating: 0,
+        completedTasks: 0,
+        efficiency: 0,
+        costPerTask: 0
+      });
+    }
+
     res.json({ message: "User Registered", user });
   } catch (err) {
     res.status(400).json({ error: err.message });
@@ -36,10 +48,6 @@ export const login = async (req, res) => {
 
     // Check for Super Admin hardcoded login
     if (email === SUPER_ADMIN_EMAIL && password === SUPER_ADMIN_PASSWORD) {
-      // Check if super admin exists in DB, if not create/update (optional, but good for ID consistency)
-      // For simplicity, we'll return a special token or mock user object if not in DB, 
-      // but ideally we should have a user record.
-      // Let's check if a user with this email exists.
       let superUser = await User.findOne({ email: SUPER_ADMIN_EMAIL });
       if (!superUser) {
         const hashed = await bcrypt.hash(SUPER_ADMIN_PASSWORD, 10);
@@ -84,9 +92,6 @@ export const createAdmin = async (req, res) => {
   try {
     const { name, email, password, city } = req.body;
 
-    // Verify requester is super admin (middleware should handle this, but double check)
-    // For now, assuming route is protected by verifyToken and checkRole('superadmin')
-
     const existingUser = await User.findOne({ email });
     if (existingUser) return res.status(400).json({ message: "User already exists" });
 
@@ -104,5 +109,36 @@ export const createAdmin = async (req, res) => {
 
   } catch (err) {
     res.status(500).json({ error: err.message });
+  }
+};
+
+export const updateProfile = async (req, res) => {
+  try {
+    const user = await User.findById(req.user.id);
+
+    if (!user) return res.status(404).json({ message: "User not found" });
+
+    const { name, phone } = req.body;
+
+    if (name) user.name = name;
+    if (phone) user.phone = phone;
+
+    await user.save();
+
+    res.json({ message: "Profile updated", user });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+};
+
+export const getMe = async (req, res) => {
+  try {
+    const user = await User.findById(req.user.id).select("-password");
+
+    if (!user) return res.status(404).json({ message: "User not found" });
+
+    res.json(user);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
   }
 };

@@ -1,15 +1,12 @@
 import express from "express";
 import { protect } from "../middleware/authMiddleware.js";
-import { roleCheck } from "../middleware/roleMiddleware.js";
-import { updateTaskStatus } from "../controllers/contractor.controller.js";
+import { getAllContractors, getAssignedTasks, updateTaskStatus, getContractorProfile } from "../controllers/contractor.controller.js";
 
 const router = express.Router();
 
-router.post(
-  "/update",
-  protect,
-  roleCheck(["contractor"]),
-  updateTaskStatus
-);
+router.get("/all", protect, getAllContractors);
+router.get("/assigned-tasks", protect, getAssignedTasks);
+router.post("/update", protect, updateTaskStatus);
+router.get("/profile", protect, getContractorProfile);
 
 export default router;
