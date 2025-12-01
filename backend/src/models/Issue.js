@@ -3,7 +3,7 @@ import mongoose from "mongoose";
 
 const issueSchema = new mongoose.Schema(
   {
-    userId: mongoose.Schema.Types.ObjectId,
+    userId: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
     title: String,
     description: String,
     imageUrl: String,
@@ -16,7 +16,8 @@ const issueSchema = new mongoose.Schema(
         "under_contractor",
         "fund_approval_pending",
         "in_progress",
-        "resolved"
+        "resolved",
+        "closed"
       ],
       default: "reported",
     },
@@ -30,7 +31,7 @@ const issueSchema = new mongoose.Schema(
     },
     city: { type: String }, // To assign to City Admin
     upvotes: { type: Number, default: 0 },
-    contractorId: mongoose.Schema.Types.ObjectId,
+    contractorId: { type: mongoose.Schema.Types.ObjectId, ref: "Contractor" },
   },
   { timestamps: true }
 );
