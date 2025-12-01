@@ -1,34 +1,30 @@
 import { useEffect, useState } from 'react';
-import { Users, Plus } from 'lucide-react';
+import { Users, Star, TrendingUp, DollarSign, Award } from 'lucide-react';
 import Card from '../../components/common/Card';
-import Button from '../../components/common/Button';
 import Loader from '../../components/common/Loader';
 import { adminService } from '../../api/services/adminService';
-
 
 const ContractorList = () => {
     const [contractors, setContractors] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [sortBy, setSortBy] = useState('rating');
+
+    const fetchContractors = async () => {
+        setLoading(true);
+        try {
+            const data = await adminService.getContractors({ sortBy });
+            setContractors(data);
+        } catch (error) {
+            console.error('Failed to fetch contractors:', error);
+            setContractors([]);
+        } finally {
+            setLoading(false);
+        }
+    };
 
     useEffect(() => {
-        const fetchContractors = async () => {
-            try {
-                const data = await adminService.getContractors();
-                setContractors(data);
-            } catch (error) {
-                console.error('Failed to fetch contractors:', error);
-                // Fallback mock data
-                setContractors([
-                    { id: 1, name: 'City Works Dept.', email: 'works@city.gov', status: 'active', tasks: 12 },
-                    { id: 2, name: 'Road Fixers Inc.', email: 'contact@roadfixers.com', status: 'active', tasks: 5 },
-                    { id: 3, name: 'Green Parks Co.', email: 'info@greenparks.com', status: 'inactive', tasks: 0 },
-                ]);
-            } finally {
-                setLoading(false);
-            }
-        };
         fetchContractors();
-    }, []);
+    }, [sortBy]);
 
     if (loading) {
         return (
@@ -43,31 +39,80 @@ const ContractorList = () => {
             <div className="flex justify-between items-center mb-8">
                 <div>
                     <h1 className="text-3xl font-bold text-white mb-2">Contractors</h1>
-                    <p className="text-gray-400">Manage contractors and assignments.</p>
+                    <p className="text-gray-400">Manage contractors and view performance metrics.</p>
                 </div>
-                <Button icon={Plus}>Add Contractor</Button>
+                <div className="flex items-center gap-2">
+                    <span className="text-gray-400 text-sm">Sort by:</span>
+                    <select
+                        value={sortBy}
+                        onChange={(e) => setSortBy(e.target.value)}
+                        className="bg-gray-800 text-white border border-gray-700 rounded-lg px-3 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                    >
+                        <option value="rating">Rating</option>
+                        <option value="efficiency">Efficiency</option>
+                        <option value="cost">Lowest Cost</option>
+                    </select>
+                </div>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {contractors.map((contractor) => (
-                    <Card key={contractor.id} hover className="flex flex-col items-center text-center p-6">
-                        <div className="w-16 h-16 bg-gray-700 rounded-full flex items-center justify-center mb-4">
-                            <Users className="w-8 h-8 text-gray-400" />
-                        </div>
-                        <h3 className="text-xl font-bold text-white mb-1">{contractor.name}</h3>
-                        <p className="text-gray-400 text-sm mb-4">{contractor.email}</p>
+                {contractors.map((contractor) => {
+                    const isTopPerformer = contractor.rating >= 4.5 && contractor.efficiency >= 90;
+                    const isBestValue = contractor.costPerTask < 500 && contractor.rating >= 4.0;
 
-                        <div className="flex items-center gap-2 mb-6">
-                            <span className={`w-2 h-2 rounded-full ${contractor.status === 'active' ? 'bg-green-500' : 'bg-gray-500'}`} />
-                            <span className="text-sm text-gray-300 capitalize">{contractor.status}</span>
-                        </div>
+                    return (
+                        <Card key={contractor._id} hover className="flex flex-col p-6 relative overflow-hidden">
+                            {isTopPerformer && (
+                                <div className="absolute top-0 right-0 bg-yellow-500/20 text-yellow-500 text-xs font-bold px-3 py-1 rounded-bl-xl flex items-center gap-1">
+                                    <Award className="w-3 h-3" /> Top Performer
+                                </div>
+                            )}
+                            {isBestValue && !isTopPerformer && (
+                                <div className="absolute top-0 right-0 bg-green-500/20 text-green-500 text-xs font-bold px-3 py-1 rounded-bl-xl flex items-center gap-1">
+                                    <DollarSign className="w-3 h-3" /> Best Value
+                                </div>
+                            )}
 
-                        <div className="w-full border-t border-gray-700 pt-4 flex justify-between items-center">
-                            <span className="text-gray-400 text-sm">Active Tasks</span>
-                            <span className="text-white font-bold">{contractor.tasks}</span>
-                        </div>
-                    </Card>
-                ))}
+                            <div className="flex items-center gap-4 mb-6">
+                                <div className="w-16 h-16 bg-gray-700 rounded-full flex items-center justify-center text-2xl font-bold text-gray-400">
+                                    {contractor.companyName?.charAt(0) || <Users className="w-8 h-8" />}
+                                </div>
+                                <div>
+                                    <h3 className="text-xl font-bold text-white mb-1">{contractor.companyName}</h3>
+                                    <p className="text-gray-400 text-sm">{contractor.userId?.email || 'No Email'}</p>
+                                </div>
+                            </div>
+
+                            <div className="grid grid-cols-2 gap-4 mb-6">
+                                <div className="bg-gray-800/50 p-3 rounded-lg">
+                                    <div className="flex items-center gap-2 text-yellow-500 mb-1">
+                                        <Star className="w-4 h-4 fill-current" />
+                                        <span className="font-bold">{contractor.rating?.toFixed(1) || 'N/A'}</span>
+                                    </div>
+                                    <p className="text-xs text-gray-500">Rating</p>
+                                </div>
+                                <div className="bg-gray-800/50 p-3 rounded-lg">
+                                    <div className="flex items-center gap-2 text-blue-500 mb-1">
+                                        <TrendingUp className="w-4 h-4" />
+                                        <span className="font-bold">{contractor.efficiency || 0}%</span>
+                                    </div>
+                                    <p className="text-xs text-gray-500">Efficiency</p>
+                                </div>
+                            </div>
+
+                            <div className="space-y-3">
+                                <div className="flex justify-between text-sm">
+                                    <span className="text-gray-400">Completed Tasks</span>
+                                    <span className="text-white font-medium">{contractor.completedTasks || 0}</span>
+                                </div>
+                                <div className="flex justify-between text-sm">
+                                    <span className="text-gray-400">Avg Cost/Task</span>
+                                    <span className="text-white font-medium">${contractor.costPerTask || 0}</span>
+                                </div>
+                            </div>
+                        </Card>
+                    );
+                })}
             </div>
         </div>
     );

@@ -3,7 +3,7 @@ import { motion } from 'framer-motion';
 import { Users, AlertCircle, CheckCircle, Clock } from 'lucide-react';
 import Card from '../../components/common/Card';
 import Loader from '../../components/common/Loader';
-import { dashboardService } from '../../api/services/dashboardService';
+import { adminService } from '../../api/services/adminService';
 
 
 const AdminDashboard = () => {
@@ -18,7 +18,7 @@ const AdminDashboard = () => {
     useEffect(() => {
         const fetchStats = async () => {
             try {
-                const data = await dashboardService.getStats();
+                const data = await adminService.getStats();
                 setStats(data);
             } catch (error) {
                 console.error('Failed to fetch admin stats:', error);
@@ -51,6 +51,36 @@ const AdminDashboard = () => {
         { label: 'Active Contractors', value: stats.activeContractors, icon: Users, color: 'text-purple-500', bg: 'bg-purple-500/10' },
     ];
 
+    // Simple SVG Bar Chart Component
+    const BarChart = () => (
+        <div className="w-full h-64 flex items-end justify-between gap-2 px-4">
+            {[40, 70, 45, 90, 60, 80, 50].map((h, i) => (
+                <div key={i} className="w-full bg-blue-500/20 rounded-t-sm relative group hover:bg-blue-500/40 transition-colors" style={{ height: `${h}%` }}>
+                    <div className="absolute -top-8 left-1/2 -translate-x-1/2 bg-gray-800 text-white text-xs py-1 px-2 rounded opacity-0 group-hover:opacity-100 transition-opacity">
+                        {h} issues
+                    </div>
+                </div>
+            ))}
+        </div>
+    );
+
+    // Simple SVG Pie Chart Representation (CSS Conic Gradient)
+    const PieChart = () => (
+        <div className="relative w-48 h-48 rounded-full" style={{
+            background: `conic-gradient(
+                #3b82f6 0% 40%, 
+                #f97316 40% 70%, 
+                #22c55e 70% 100%
+            )`
+        }}>
+            <div className="absolute inset-0 m-8 bg-[#1e1e2e] rounded-full flex items-center justify-center">
+                <div className="text-center">
+                    <span className="text-gray-400 text-xs">Distribution</span>
+                </div>
+            </div>
+        </div>
+    );
+
     return (
         <div>
             <div className="mb-8">
@@ -80,11 +110,31 @@ const AdminDashboard = () => {
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                <Card className="h-96 flex items-center justify-center">
-                    <p className="text-gray-500">Issue Trends Chart (Placeholder)</p>
+                <Card className="h-96 flex flex-col">
+                    <h3 className="text-lg font-bold text-white mb-6">Issue Trends</h3>
+                    <div className="flex-1 flex items-center justify-center">
+                        <BarChart />
+                    </div>
                 </Card>
-                <Card className="h-96 flex items-center justify-center">
-                    <p className="text-gray-500">Category Distribution Chart (Placeholder)</p>
+                <Card className="h-96 flex flex-col">
+                    <h3 className="text-lg font-bold text-white mb-6">Category Distribution</h3>
+                    <div className="flex-1 flex items-center justify-center gap-8">
+                        <PieChart />
+                        <div className="space-y-3">
+                            <div className="flex items-center gap-2">
+                                <div className="w-3 h-3 rounded-full bg-blue-500"></div>
+                                <span className="text-gray-300 text-sm">Infrastructure (40%)</span>
+                            </div>
+                            <div className="flex items-center gap-2">
+                                <div className="w-3 h-3 rounded-full bg-orange-500"></div>
+                                <span className="text-gray-300 text-sm">Public Safety (30%)</span>
+                            </div>
+                            <div className="flex items-center gap-2">
+                                <div className="w-3 h-3 rounded-full bg-green-500"></div>
+                                <span className="text-gray-300 text-sm">Sanitation (30%)</span>
+                            </div>
+                        </div>
+                    </div>
                 </Card>
             </div>
         </div>
