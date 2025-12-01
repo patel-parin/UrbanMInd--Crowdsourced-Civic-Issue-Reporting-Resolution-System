@@ -22,7 +22,7 @@ app.use(
   cors({
     origin: [
       "http://localhost:3000",                  // local dev
-      "https://urban-m-ind-crowdsourced-civic-issu.vercel.app/"      // 🔥 your Render frontend URL
+      "https://urban-m-ind-crowdsourced-civic-issu.vercel.app"      // 🔥 your Render frontend URL
     ],
     methods: "GET,POST,PUT,DELETE,PATCH",
     credentials: true,
