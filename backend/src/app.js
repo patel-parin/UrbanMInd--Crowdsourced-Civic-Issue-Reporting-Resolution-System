@@ -25,6 +25,7 @@ app.use(
     tempFileDir: "/tmp/",
   })
 );
+app.use("/uploads", express.static("uploads"));
 
 // ROUTES
 app.use("/api/auth", authRoutes);
