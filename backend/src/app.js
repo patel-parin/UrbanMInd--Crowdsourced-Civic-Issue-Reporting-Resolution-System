@@ -17,14 +17,27 @@ import dashboardRoutes from "./routes/dashboard.routes.js";
 
 const app = express();
 
-app.use(cors());
+// ✅ Add proper CORS for Render frontend
+app.use(
+  cors({
+    origin: [
+      "http://localhost:3000",                  // local dev
+      "https://urbanmind-crowdsourced-civic-issue-u37h.onrender.com"      // 🔥 your Render frontend URL
+    ],
+    methods: "GET,POST,PUT,DELETE,PATCH",
+    credentials: true,
+  })
+);
+
 app.use(express.json());
+
 app.use(
   fileUpload({
     useTempFiles: true,
     tempFileDir: "/tmp/",
   })
 );
+
 app.use("/uploads", express.static("uploads"));
 
 // ROUTES
