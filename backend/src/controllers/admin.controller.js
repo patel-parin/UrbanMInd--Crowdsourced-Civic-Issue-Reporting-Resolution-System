@@ -1,6 +1,7 @@
 import Issue from "../models/Issue.js";
 import Assignment from "../models/Assignment.js";
 import User from "../models/User.js";
+import bcrypt from "bcryptjs";
 
 
 export const getAdminStats = async (req, res) => {
@@ -58,5 +59,34 @@ export const assignToContractor = async (req, res) => {
     res.json({ message: "Contractor Assigned", assign });
   } catch (err) {
     res.status(400).json({ error: err.message });
+  }
+
+};
+
+
+export const resetUserPassword = async (req, res) => {
+  try {
+    const { email, newPassword } = req.body;
+
+    // Find user by email
+    const user = await User.findOne({ email });
+
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    // Hash new password
+    const hashed = await bcrypt.hash(newPassword, 10);
+
+    // Update password
+    user.password = hashed;
+    await user.save();
+
+    res.json({
+      message: "Password reset successful ✅",
+      resetFor: user.email,
+    });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
   }
 };
