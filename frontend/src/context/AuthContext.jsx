@@ -42,6 +42,8 @@ export const AuthProvider = ({ children }) => {
 
 
     const login = async (email, password) => {
+          localStorage.removeItem("token");
+  localStorage.removeItem("user");
         try {
             const response = await api.post('/auth/login', { email, password });
             const { token, user } = response.data;
@@ -78,6 +80,7 @@ export const AuthProvider = ({ children }) => {
     };
 
     const register = async (userData) => {
+        localStorage.removeItem("token");
         try {
             const response = await api.post('/auth/register', userData);
             toast.success('Registration successful! Please login.');
