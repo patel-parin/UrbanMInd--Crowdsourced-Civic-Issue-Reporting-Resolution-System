@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import 'features/auth/providers/auth_provider.dart';
 import 'features/home/providers/home_provider.dart';
 import 'routes/app_routes.dart';
+import 'core/theme/app_theme.dart';
 
 class UrbanMindApp extends StatelessWidget {
   const UrbanMindApp({super.key});
@@ -17,17 +18,7 @@ class UrbanMindApp extends StatelessWidget {
       child: MaterialApp(
         title: 'UrbanMind',
         debugShowCheckedModeBanner: false,
-        theme: ThemeData(
-          colorScheme: ColorScheme.fromSeed(
-            seedColor: Colors.deepPurple,
-            brightness: Brightness.light,
-          ),
-          useMaterial3: true,
-          inputDecorationTheme: const InputDecorationTheme(
-            filled: true,
-            border: OutlineInputBorder(),
-          ),
-        ),
+        theme: AppTheme.lightTheme,
         initialRoute: AppRoutes.splash,
         routes: AppRoutes.routes,
       ),
