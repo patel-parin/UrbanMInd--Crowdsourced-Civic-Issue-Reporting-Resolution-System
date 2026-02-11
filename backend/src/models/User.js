@@ -11,10 +11,13 @@ const userSchema = new mongoose.Schema(
       enum: ["citizen", "admin", "contractor", "superadmin"],
       default: "citizen",
     },
-    city: { type: String }, // For City Admins
+    city: { type: String }, // Lowest level (Village/City)
+    state: { type: String },
+    district: { type: String },
+    taluka: { type: String },
     isSuperAdmin: { type: Boolean, default: false },
     impactPoints: { type: Number, default: 0 },
-citizenLevel: { type: Number, default: 1 },
+    citizenLevel: { type: Number, default: 1 },
   },
   { timestamps: true }
 );

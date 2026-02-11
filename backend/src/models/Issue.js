@@ -6,7 +6,8 @@ const issueSchema = new mongoose.Schema(
     userId: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
     title: String,
     description: String,
-    imageUrl: String,
+    images: [{ type: String }], // Changed from single imageUrl to array
+    voiceNoteUrl: String, // New field for voice notes
     status: {
       type: String,
       enum: [
@@ -21,8 +22,20 @@ const issueSchema = new mongoose.Schema(
       ],
       default: "reported",
     },
+    priority: {
+      type: String,
+      enum: ["low", "medium", "high", "critical"],
+      default: "medium"
+    },
     fundAmount: { type: Number, default: 0 },
     fundApproved: { type: Boolean, default: false },
+    costEstimate: {
+      materials: { type: Number, default: 0 },
+      labor: { type: Number, default: 0 },
+      equipment: { type: Number, default: 0 },
+      total: { type: Number, default: 0 },
+      description: String
+    },
     category: String,
     gps: {
       lat: Number,
