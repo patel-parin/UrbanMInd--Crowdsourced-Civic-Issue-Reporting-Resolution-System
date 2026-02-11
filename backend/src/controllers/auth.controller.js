@@ -9,7 +9,7 @@ const SUPER_ADMIN_PASSWORD = process.env.SUPER_ADMIN_PASSWORD || "admin123";
 
 export const register = async (req, res) => {
   try {
-    const { name, email, password, role } = req.body;
+    const { name, email, password, role, city, state, district, taluka } = req.body;
 
     // Prevent self-registration of admin or superadmin
     if (role === "admin" || role === "superadmin") {
@@ -23,6 +23,10 @@ export const register = async (req, res) => {
       email,
       password: hashed,
       role: role || "citizen",
+      city: city || "Unknown",
+      state,
+      district,
+      taluka
     });
 
     if (role === "contractor") {
@@ -90,7 +94,7 @@ export const login = async (req, res) => {
 // Only Super Admin can call this
 export const createAdmin = async (req, res) => {
   try {
-    const { name, email, password, city } = req.body;
+    const { name, email, password, city, state, district, taluka } = req.body;
 
     const existingUser = await User.findOne({ email });
     if (existingUser) return res.status(400).json({ message: "User already exists" });
@@ -102,7 +106,10 @@ export const createAdmin = async (req, res) => {
       email,
       password: hashed,
       role: "admin",
-      city: city // Assign city to this admin
+      city: city, // Assign city to this admin
+      state,
+      district,
+      taluka
     });
 
     res.json({ message: "City Admin Created Successfully", admin: newAdmin });

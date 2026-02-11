@@ -46,7 +46,14 @@ export const getAssignedTasks = async (req, res) => {
       return res.status(404).json({ message: "Contractor profile not found" });
     }
 
-    const tasks = await Issue.find({ contractorId: contractor._id }).sort({ createdAt: -1 });
+    // Ensure we only return tasks that match the contractor's city (extra safety)
+    // Although assignment logic should prevent this, it's good to be strict.
+    const query = { contractorId: contractor._id };
+    if (req.user.city && req.user.city !== 'Unknown') {
+      query.city = req.user.city;
+    }
+
+    const tasks = await Issue.find(query).sort({ createdAt: -1 });
     res.json(tasks);
   } catch (err) {
     res.status(500).json({ error: err.message });

@@ -1,18 +1,47 @@
 import Issue from "../models/Issue.js";
+import Contractor from "../models/Contractor.js";
 import Assignment from "../models/Assignment.js";
 import User from "../models/User.js";
-import bcrypt from "bcryptjs";
 
 
 export const getAdminStats = async (req, res) => {
   try {
-    const totalIssues = await Issue.countDocuments();
+    const isSuperAdmin = req.user.role === 'superadmin';
+    const adminCity = req.user.city;
+
+    let query = {};
+
+    if (!isSuperAdmin) {
+      if (adminCity && adminCity !== 'Unknown') {
+        query.city = adminCity;
+      } else {
+        // If not superadmin and no valid city, return zero stats
+        return res.json({
+          totalIssues: 0,
+          openIssues: 0,
+          resolvedIssues: 0,
+          activeContractors: 0
+        });
+      }
+    }
+
+    const totalIssues = await Issue.countDocuments(query);
+
     // Open issues = anything not resolved or closed
     const openIssues = await Issue.countDocuments({
+      ...query,
       status: { $nin: ["resolved", "closed"] }
     });
-    const resolvedIssues = await Issue.countDocuments({ status: "resolved" });
-    const activeContractors = await User.countDocuments({ role: "contractor" });
+
+    const resolvedIssues = await Issue.countDocuments({
+      ...query,
+      status: "resolved"
+    });
+
+    const contractorQuery = { role: "contractor" };
+    if (!isSuperAdmin && adminCity) contractorQuery.city = adminCity;
+
+    const activeContractors = await User.countDocuments(contractorQuery);
 
     res.json({
       totalIssues,
@@ -27,18 +56,69 @@ export const getAdminStats = async (req, res) => {
 
 export const getContractors = async (req, res) => {
   try {
+    const isSuperAdmin = req.user.role === 'superadmin';
     const adminCity = req.user.city;
-    let query = { role: 'contractor' };
 
-    // If admin has a city (City Admin), only show contractors in that city
-    // If Super Admin (no city or special flag), might see all? 
-    // Assuming City Admin logic here.
-    if (adminCity) {
-      query.city = adminCity;
+    // Build query for Contractors based on their linked User's city
+    // This is slightly complex because city is on the User model.
+    // Simpler approach: Fetch all contractors, populate user, then filter.
+
+    let contractors = await Contractor.find().populate('userId', 'name email city role');
+
+    if (!isSuperAdmin) {
+      if (adminCity && adminCity !== 'Unknown') {
+        contractors = contractors.filter(c => c.userId && c.userId.city === adminCity);
+      } else {
+        return res.json([]);
+      }
     }
 
-    const contractors = await User.find(query).select('-password');
-    res.json(contractors);
+    // Calculate metrics for each contractor
+    const contractorsWithMetrics = await Promise.all(contractors.map(async (contractor) => {
+      const issues = await Issue.find({ contractorId: contractor._id });
+
+      const totalAssigned = issues.length;
+      const completedTasks = issues.filter(i => i.status === 'resolved' || i.status === 'closed').length;
+
+      // Calculate Efficiency
+      let efficiency = 0;
+      if (totalAssigned > 0) {
+        efficiency = Math.round((completedTasks / totalAssigned) * 100);
+      }
+
+      // Calculate Avg Cost
+      let totalCost = 0;
+      issues.forEach(i => {
+        if (i.status === 'resolved' || i.status === 'closed') {
+          totalCost += (i.fundAmount || 0);
+        }
+      });
+      const costPerTask = completedTasks > 0 ? Math.round(totalCost / completedTasks) : 0;
+
+      // Calculate Rating (Mock formula: Base 4.0 + efficiency bonus)
+      // Cap at 5.0
+      let rating = 0;
+      if (totalAssigned > 0) {
+        rating = 4.0 + (efficiency / 100);
+        if (rating > 5.0) rating = 5.0;
+      }
+
+      const isActive = issues.some(i => i.status === 'in_progress');
+
+      return {
+        _id: contractor._id,
+        companyName: contractor.companyName,
+        email: contractor.userId?.email,
+        name: contractor.userId?.name,
+        efficiency,
+        rating,
+        completedTasks,
+        costPerTask,
+        isActive
+      };
+    }));
+
+    res.json(contractorsWithMetrics);
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
@@ -60,32 +140,33 @@ export const assignToContractor = async (req, res) => {
   } catch (err) {
     res.status(400).json({ error: err.message });
   }
-
 };
 
 
 export const resetUserPassword = async (req, res) => {
   try {
-    const { email, newPassword } = req.body;
+    const { userId, newPassword } = req.body;
 
-    // Find user by email
-    const user = await User.findOne({ email });
+    if (!userId || !newPassword) {
+      return res.status(400).json({ message: "User ID and new password are required" });
+    }
+
+    // Hash new password
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(newPassword, salt);
+
+    const user = await User.findByIdAndUpdate(
+      userId,
+      { password: hashedPassword },
+      { new: true }
+    );
 
     if (!user) {
       return res.status(404).json({ message: "User not found" });
     }
 
-    // Hash new password
-    const hashed = await bcrypt.hash(newPassword, 10);
+    res.json({ message: "Password reset successfully" });
 
-    // Update password
-    user.password = hashed;
-    await user.save();
-
-    res.json({
-      message: "Password reset successful ✅",
-      resetFor: user.email,
-    });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
