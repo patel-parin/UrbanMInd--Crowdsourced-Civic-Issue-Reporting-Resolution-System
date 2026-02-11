@@ -3,17 +3,30 @@ import Contractor from "../models/Contractor.js";
 import User from "../models/User.js";
 import { classifyImage } from "../utils/aiClassifier.js";
 import fetch from "node-fetch";
+import { sendIssueStatusEmail } from "../services/emailService.js";
 
 
 export const createIssue = async (req, res) => {
   try {
-    const { title, description, lat, lng, address } = req.body;
+    const { title, description, lat, lng, address, priority } = req.body;
 
-    const imageFile = req.files?.image;
-    let imageUrl = "";
-    if (imageFile) {
-      imageUrl = `/uploads/${Date.now()}_${imageFile.name}`;
-      await imageFile.mv("." + imageUrl);
+    // Handle Images (Multiple)
+    let images = [];
+    if (req.files?.images) {
+      const files = Array.isArray(req.files.images) ? req.files.images : [req.files.images];
+      for (const file of files) {
+        const path = `/uploads/${Date.now()}_${file.name}`;
+        await file.mv("." + path);
+        images.push(path);
+      }
+    }
+
+    // Handle Voice Note
+    let voiceNoteUrl = "";
+    if (req.files?.voiceNote) {
+      const file = req.files.voiceNote;
+      voiceNoteUrl = `/uploads/${Date.now()}_${file.name}`;
+      await file.mv("." + voiceNoteUrl);
     }
 
     // 🔥 Real reverse geocoding
@@ -23,7 +36,9 @@ export const createIssue = async (req, res) => {
       userId: req.user.id,
       title,
       description,
-      imageUrl,
+      images,
+      voiceNoteUrl,
+      priority: priority || "medium",
       category: "General",
       gps: { lat, lng, address },
       city
@@ -44,7 +59,22 @@ export const createIssue = async (req, res) => {
 
 export const getAllIssues = async (req, res) => {
   try {
-    const issues = await Issue.find()
+    const query = {};
+
+    // Super Admin sees everything
+    if (req.user.role === 'superadmin') {
+      // No filter
+    } else {
+      // Filter by city if user has one, otherwise show all (or maybe limit?)
+      // For now, to ensure data shows up, we'll only filter if both user and issue have city data
+      if (req.user.city && req.user.city !== 'Unknown') {
+        // Optional: make this less strict or allow viewing all for now
+        // query.city = req.user.city; 
+        // Commenting out strict filtering to ensure "Live City Issues" works for demo
+      }
+    }
+
+    const issues = await Issue.find(query)
       .populate("userId", "name email")
       .populate("contractorId", "companyName")
       .sort({ createdAt: -1 });
@@ -71,17 +101,41 @@ export const requestFunds = async (req, res) => {
   }
 };
 
+export const submitCostEstimate = async (req, res) => {
+  try {
+    const { issueId, materials, labor, equipment, description } = req.body;
+    const issue = await Issue.findById(issueId);
+
+    if (!issue) return res.status(404).json({ message: "Issue not found" });
+
+    const total = Number(materials) + Number(labor) + Number(equipment);
+
+    issue.costEstimate = {
+      materials,
+      labor,
+      equipment,
+      total,
+      description
+    };
+
+    // Auto-update fund amount request based on estimate
+    issue.fundAmount = total;
+    issue.status = "fund_approval_pending";
+
+    await issue.save();
+
+    res.json({ message: "Cost estimate submitted", issue });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
+
 export const approveFunds = async (req, res) => {
   try {
     const { issueId } = req.body;
     const issue = await Issue.findById(issueId);
 
     if (!issue) return res.status(404).json({ message: "Issue not found" });
-
-    // Logic: If amount > 1000, only Super Admin can approve
-    // if (issue.fundAmount > 1000 && req.user.role !== 'superadmin') {
-    //   return res.status(403).json({ message: "Amount exceeds limit. Requires Super Admin approval." });
-    // }
 
     issue.fundApproved = true;
     issue.status = "in_progress"; // Funds approved, work starts
@@ -127,9 +181,14 @@ export const updateIssueStatus = async (req, res) => {
       issueId,
       { status },
       { new: true }
-    );
+    ).populate("userId", "email name");
 
     if (!issue) return res.status(404).json({ message: "Issue not found" });
+
+    // Send email notification
+    if (issue.userId && issue.userId.email) {
+      await sendIssueStatusEmail(issue.userId.email, issue.title, status, issue._id);
+    }
 
     res.json({ message: "Status updated", issue });
   } catch (err) {
