@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { BarChart, PieChart, Activity, TrendingUp } from 'lucide-react';
+import { BarChart, PieChart, Activity, TrendingUp, DollarSign, FileText } from 'lucide-react';
 import Card from '../../components/common/Card';
 import Loader from '../../components/common/Loader';
 import { issueService } from '../../api/services/issueService';
@@ -11,6 +11,7 @@ const Analytics = () => {
         pending: 0,
         resolved: 0,
         inProgress: 0,
+        funds: 0,
         byCategory: {}
     });
 
@@ -21,7 +22,7 @@ const Analytics = () => {
 
                 // Calculate Stats
                 const total = issues.length;
-                const pending = issues.filter(i => i.status === 'pending').length;
+                const pending = issues.filter(i => ['reported', 'assigned', 'under_contractor_survey', 'under_contractor', 'fund_approval_pending'].includes(i.status)).length;
                 const resolved = issues.filter(i => i.status === 'resolved').length;
                 const inProgress = issues.filter(i => i.status === 'in_progress').length;
 
@@ -30,7 +31,9 @@ const Analytics = () => {
                     return acc;
                 }, {});
 
-                setStats({ total, pending, resolved, inProgress, byCategory });
+                const funds = issues.reduce((acc, curr) => acc + (curr.fundAmount || 0), 0);
+
+                setStats({ total, pending, resolved, inProgress, funds, byCategory });
             } catch (error) {
                 console.error('Failed to load analytics data:', error);
             } finally {
@@ -51,9 +54,40 @@ const Analytics = () => {
                 <p className="text-gray-400">Real-time insights into urban issues.</p>
             </div>
 
+            <div className="flex justify-end mb-6">
+                <button
+                    onClick={() => {
+                        const headers = ["Metric", "Value"];
+                        const csvContent = [
+                            headers.join(","),
+                            `Total Issues,${stats.total}`,
+                            `Pending Issues,${stats.pending}`,
+                            `In Progress,${stats.inProgress}`,
+                            `Resolved,${stats.resolved}`,
+                            `Total Funds Requested,$${stats.funds}`,
+                            ...Object.entries(stats.byCategory).map(([k, v]) => `Category: ${k},${v}`)
+                        ].join("\n");
+
+                        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+                        const link = document.createElement("a");
+                        const url = URL.createObjectURL(blob);
+                        link.setAttribute("href", url);
+                        link.setAttribute("download", "analytics_report.csv");
+                        link.style.visibility = 'hidden';
+                        document.body.appendChild(link);
+                        link.click();
+                        document.body.removeChild(link);
+                    }}
+                    className="flex items-center gap-2 px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl transition-colors shadow-lg shadow-indigo-500/20"
+                >
+                    <FileText className="w-4 h-4" />
+                    <span>Generate Report</span>
+                </button>
+            </div>
+
             {/* Key Metrics */}
             <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-                <Card className="bg-linear-to-br from-indigo-900/50 to-slate-900 border-indigo-500/30">
+                <Card className="bg-gradient-to-br from-indigo-900/50 to-slate-900 border-indigo-500/30">
                     <div className="flex items-center gap-4">
                         <div className="p-3 bg-indigo-500/20 rounded-xl text-indigo-400">
                             <Activity className="w-6 h-6" />
@@ -64,7 +98,7 @@ const Analytics = () => {
                         </div>
                     </div>
                 </Card>
-                <Card className="bg-linear-to-br from-orange-900/50 to-slate-900 border-orange-500/30">
+                <Card className="bg-gradient-to-br from-orange-900/50 to-slate-900 border-orange-500/30">
                     <div className="flex items-center gap-4">
                         <div className="p-3 bg-orange-500/20 rounded-xl text-orange-400">
                             <Activity className="w-6 h-6" />
@@ -75,7 +109,7 @@ const Analytics = () => {
                         </div>
                     </div>
                 </Card>
-                <Card className="bg-linear-to-br from-blue-900/50 to-slate-900 border-blue-500/30">
+                <Card className="bg-gradient-to-br from-blue-900/50 to-slate-900 border-blue-500/30">
                     <div className="flex items-center gap-4">
                         <div className="p-3 bg-blue-500/20 rounded-xl text-blue-400">
                             <TrendingUp className="w-6 h-6" />
@@ -86,7 +120,7 @@ const Analytics = () => {
                         </div>
                     </div>
                 </Card>
-                <Card className="bg-linear-to-br from-green-900/50 to-slate-900 border-green-500/30">
+                <Card className="bg-gradient-to-br from-green-900/50 to-slate-900 border-green-500/30">
                     <div className="flex items-center gap-4">
                         <div className="p-3 bg-green-500/20 rounded-xl text-green-400">
                             <Activity className="w-6 h-6" />
@@ -94,6 +128,18 @@ const Analytics = () => {
                         <div>
                             <p className="text-gray-400 text-sm">Resolved</p>
                             <h3 className="text-3xl font-bold text-white">{stats.resolved}</h3>
+                        </div>
+                    </div>
+                </Card>
+
+                <Card className="bg-gradient-to-br from-emerald-900/50 to-slate-900 border-emerald-500/30">
+                    <div className="flex items-center gap-4">
+                        <div className="p-3 bg-emerald-500/20 rounded-xl text-emerald-400">
+                            <DollarSign className="w-6 h-6" />
+                        </div>
+                        <div>
+                            <p className="text-gray-400 text-sm">Total Funds</p>
+                            <h3 className="text-3xl font-bold text-white">${stats.funds}</h3>
                         </div>
                     </div>
                 </Card>
@@ -115,7 +161,7 @@ const Analytics = () => {
                                 </div>
                                 <div className="h-3 bg-gray-700 rounded-full overflow-hidden">
                                     <div
-                                        className="h-full bg-linear-to-r from-indigo-500 to-purple-500 rounded-full transition-all duration-1000 ease-out"
+                                        className="h-full bg-gradient-to-r from-indigo-500 to-purple-500 rounded-full transition-all duration-1000 ease-out"
                                         style={{ width: `${(count / maxCategoryCount) * 100}%` }}
                                     />
                                 </div>
@@ -140,7 +186,7 @@ const Analytics = () => {
                     </p>
                 </Card>
             </div>
-        </div>
+        </div >
     );
 };
 

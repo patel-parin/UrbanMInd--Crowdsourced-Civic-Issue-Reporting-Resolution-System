@@ -1,10 +1,25 @@
 import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
-import { Users, AlertCircle, CheckCircle, Clock } from 'lucide-react';
-import Card from '../../components/common/Card';
+import { Users, AlertCircle, CheckCircle, Clock, Activity, ArrowUpRight, Map as MapIcon, AlertTriangle } from 'lucide-react';
+import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
+import 'leaflet/dist/leaflet.css';
+import L from 'leaflet';
+import icon from 'leaflet/dist/images/marker-icon.png';
+import iconShadow from 'leaflet/dist/images/marker-shadow.png';
+
+import GlassCard from '../../components/common/GlassCard';
 import Loader from '../../components/common/Loader';
 import { adminService } from '../../api/services/adminService';
+import { issueService } from '../../api/services/issueService';
 
+// Fix Leaflet default icon
+let DefaultIcon = L.icon({
+    iconUrl: icon,
+    shadowUrl: iconShadow,
+    iconSize: [25, 41],
+    iconAnchor: [12, 41]
+});
+L.Marker.prototype.options.icon = DefaultIcon;
 
 const AdminDashboard = () => {
     const [stats, setStats] = useState({
@@ -13,81 +28,60 @@ const AdminDashboard = () => {
         resolvedIssues: 0,
         activeContractors: 0,
     });
+    const [issues, setIssues] = useState([]);
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        const fetchStats = async () => {
+        const fetchData = async () => {
             try {
-                const data = await adminService.getStats();
-                setStats(data);
+                const [statsData, issuesData] = await Promise.all([
+                    adminService.getStats(),
+                    issueService.getAll()
+                ]);
+                setStats(statsData);
+                setIssues(issuesData);
             } catch (error) {
-                console.error('Failed to fetch admin stats:', error);
-                // Fallback mock data
-                setStats({
-                    totalIssues: 156,
-                    openIssues: 42,
-                    resolvedIssues: 114,
-                    activeContractors: 12,
-                });
+                console.error('Failed to fetch admin data:', error);
             } finally {
                 setLoading(false);
             }
         };
-        fetchStats();
+        fetchData();
     }, []);
 
     if (loading) {
         return (
-            <div className="flex items-center justify-center h-64">
-                <Loader size="lg" color="blue" />
+            <div className="flex items-center justify-center h-[60vh]">
+                <Loader size="lg" color="indigo" />
             </div>
         );
     }
 
     const statCards = [
-        { label: 'Total Issues', value: stats.totalIssues, icon: AlertCircle, color: 'text-blue-500', bg: 'bg-blue-500/10' },
-        { label: 'Open Issues', value: stats.openIssues, icon: Clock, color: 'text-orange-500', bg: 'bg-orange-500/10' },
-        { label: 'Resolved', value: stats.resolvedIssues, icon: CheckCircle, color: 'text-green-500', bg: 'bg-green-500/10' },
-        { label: 'Active Contractors', value: stats.activeContractors, icon: Users, color: 'text-purple-500', bg: 'bg-purple-500/10' },
+        { label: 'Total Issues', value: stats.totalIssues, icon: AlertCircle, color: 'text-blue-400', bg: 'bg-blue-500/10', border: 'border-blue-500/20' },
+        { label: 'Open Issues', value: stats.openIssues, icon: Clock, color: 'text-orange-400', bg: 'bg-orange-500/10', border: 'border-orange-500/20' },
+        { label: 'Resolved', value: stats.resolvedIssues, icon: CheckCircle, color: 'text-green-400', bg: 'bg-green-500/10', border: 'border-green-500/20' },
+        { label: 'Active Contractors', value: stats.activeContractors, icon: Users, color: 'text-purple-400', bg: 'bg-purple-500/10', border: 'border-purple-500/20' },
     ];
 
-    // Simple SVG Bar Chart Component
-    const BarChart = () => (
-        <div className="w-full h-64 flex items-end justify-between gap-2 px-4">
-            {[40, 70, 45, 90, 60, 80, 50].map((h, i) => (
-                <div key={i} className="w-full bg-blue-500/20 rounded-t-sm relative group hover:bg-blue-500/40 transition-colors" style={{ height: `${h}%` }}>
-                    <div className="absolute -top-8 left-1/2 -translate-x-1/2 bg-gray-800 text-white text-xs py-1 px-2 rounded opacity-0 group-hover:opacity-100 transition-opacity">
-                        {h} issues
-                    </div>
-                </div>
-            ))}
-        </div>
-    );
-
-    // Simple SVG Pie Chart Representation (CSS Conic Gradient)
-    const PieChart = () => (
-        <div className="relative w-48 h-48 rounded-full" style={{
-            background: `conic-gradient(
-                #3b82f6 0% 40%, 
-                #f97316 40% 70%, 
-                #22c55e 70% 100%
-            )`
-        }}>
-            <div className="absolute inset-0 m-8 bg-[#1e1e2e] rounded-full flex items-center justify-center">
-                <div className="text-center">
-                    <span className="text-gray-400 text-xs">Distribution</span>
-                </div>
-            </div>
-        </div>
-    );
+    const priorityIssues = issues.filter(i => ['high', 'critical', 'urgent'].includes(i.priority?.toLowerCase()));
 
     return (
-        <div>
-            <div className="mb-8">
-                <h1 className="text-3xl font-bold text-white mb-2">Admin Dashboard</h1>
-                <p className="text-gray-400">Overview of system performance and issues.</p>
+        <div className="p-6 space-y-8 animate-fade-in">
+            <div className="flex justify-between items-end mb-8">
+                <div>
+                    <h1 className="text-4xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-white to-indigo-200 mb-2">
+                        Dashboard
+                    </h1>
+                    <p className="text-gray-400">Real-time overview of system performance</p>
+                </div>
+                <div className="flex items-center gap-2 text-sm text-green-400 bg-green-500/10 px-3 py-1 rounded-full border border-green-500/20">
+                    <Activity className="w-4 h-4" />
+                    <span>System Operational</span>
+                </div>
             </div>
 
+            {/* Stats Grid */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
                 {statCards.map((stat, index) => (
                     <motion.div
@@ -96,46 +90,104 @@ const AdminDashboard = () => {
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: index * 0.1 }}
                     >
-                        <Card className="flex items-center p-6">
-                            <div className={`p-4 rounded-full mr-4 ${stat.bg}`}>
+                        <GlassCard className="flex items-center p-6 relative overflow-hidden group" hover>
+                            <div className={`absolute right-0 top-0 p-20 opacity-5 rounded-full blur-3xl transition-all duration-500 group-hover:opacity-10 ${stat.bg.replace('/10', '/30')}`} />
+                            <div className={`p-4 rounded-2xl mr-4 ${stat.bg} ${stat.border} border backdrop-blur-md`}>
                                 <stat.icon className={`w-6 h-6 ${stat.color}`} />
                             </div>
                             <div>
-                                <p className="text-gray-400 text-sm">{stat.label}</p>
-                                <h3 className="text-2xl font-bold text-white">{stat.value}</h3>
+                                <p className="text-gray-400 text-sm font-medium">{stat.label}</p>
+                                <div className="flex items-baseline gap-2">
+                                    <h3 className="text-3xl font-bold text-white">{stat.value}</h3>
+                                    <span className="text-xs text-green-400 flex items-center">
+                                        <ArrowUpRight className="w-3 h-3" /> +12%
+                                    </span>
+                                </div>
                             </div>
-                        </Card>
+                        </GlassCard>
                     </motion.div>
                 ))}
             </div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                <Card className="h-96 flex flex-col">
-                    <h3 className="text-lg font-bold text-white mb-6">Issue Trends</h3>
-                    <div className="flex-1 flex items-center justify-center">
-                        <BarChart />
-                    </div>
-                </Card>
-                <Card className="h-96 flex flex-col">
-                    <h3 className="text-lg font-bold text-white mb-6">Category Distribution</h3>
-                    <div className="flex-1 flex items-center justify-center gap-8">
-                        <PieChart />
-                        <div className="space-y-3">
-                            <div className="flex items-center gap-2">
-                                <div className="w-3 h-3 rounded-full bg-blue-500"></div>
-                                <span className="text-gray-300 text-sm">Infrastructure (40%)</span>
-                            </div>
-                            <div className="flex items-center gap-2">
-                                <div className="w-3 h-3 rounded-full bg-orange-500"></div>
-                                <span className="text-gray-300 text-sm">Public Safety (30%)</span>
-                            </div>
-                            <div className="flex items-center gap-2">
-                                <div className="w-3 h-3 rounded-full bg-green-500"></div>
-                                <span className="text-gray-300 text-sm">Sanitation (30%)</span>
-                            </div>
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                {/* Heatmap / Issue Map */}
+                <GlassCard className="lg:col-span-2 min-h-[500px] flex flex-col relative overflow-hidden">
+                    <div className="flex justify-between items-center mb-6 z-10 relative">
+                        <h3 className="text-xl font-bold text-white flex items-center gap-2">
+                            <MapIcon className="w-5 h-5 text-indigo-400" />
+                            Issue Heatmap
+                        </h3>
+                        <div className="flex gap-2">
+                            <span className="text-xs px-2 py-1 rounded bg-red-500/20 text-red-400 border border-red-500/20">Critical</span>
+                            <span className="text-xs px-2 py-1 rounded bg-orange-500/20 text-orange-400 border border-orange-500/20">High</span>
+                            <span className="text-xs px-2 py-1 rounded bg-blue-500/20 text-blue-400 border border-blue-500/20">Normal</span>
                         </div>
                     </div>
-                </Card>
+
+                    <div className="flex-1 w-full rounded-xl overflow-hidden border border-white/10 relative z-0">
+                        <MapContainer
+                            center={[20.5937, 78.9629]} // Default center (India) - should be dynamic based on user city
+                            zoom={5}
+                            style={{ height: '100%', width: '100%', minHeight: '400px' }}
+                        >
+                            <TileLayer
+                                url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
+                                attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>'
+                            />
+                            {issues.map(issue => (
+                                issue.gps && issue.gps.lat && issue.gps.lng && (
+                                    <Marker
+                                        key={issue._id}
+                                        position={[issue.gps.lat, issue.gps.lng]}
+                                    >
+                                        <Popup>
+                                            <div className="text-gray-900">
+                                                <strong>{issue.title}</strong><br />
+                                                Status: {issue.status}<br />
+                                                Priority: {issue.priority}
+                                            </div>
+                                        </Popup>
+                                    </Marker>
+                                )
+                            ))}
+                        </MapContainer>
+                    </div>
+                </GlassCard>
+
+                {/* Priority Issues List */}
+                <GlassCard className="min-h-[500px] flex flex-col">
+                    <h3 className="text-xl font-bold text-white mb-6 flex items-center gap-2">
+                        <AlertTriangle className="w-5 h-5 text-red-400" />
+                        Priority Attention
+                    </h3>
+
+                    <div className="flex-1 overflow-y-auto space-y-4 pr-2 custom-scrollbar">
+                        {priorityIssues.length > 0 ? (
+                            priorityIssues.map(issue => (
+                                <div key={issue._id} className="p-4 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 transition-colors group cursor-pointer">
+                                    <div className="flex justify-between items-start mb-2">
+                                        <span className={`text-xs font-bold px-2 py-0.5 rounded uppercase ${issue.priority === 'critical' ? 'bg-red-500/20 text-red-400' : 'bg-orange-500/20 text-orange-400'
+                                            }`}>
+                                            {issue.priority}
+                                        </span>
+                                        <span className="text-xs text-gray-500">{new Date(issue.createdAt).toLocaleDateString()}</span>
+                                    </div>
+                                    <h4 className="text-white font-medium mb-1 group-hover:text-indigo-300 transition-colors">{issue.title}</h4>
+                                    <p className="text-gray-400 text-sm line-clamp-2 mb-3">{issue.description}</p>
+                                    <div className="flex items-center justify-between text-xs">
+                                        <span className="text-gray-500">{issue.city || 'Unknown City'}</span>
+                                        <span className={`px-2 py-0.5 rounded capitalize ${issue.status === 'resolved' ? 'text-green-400 bg-green-500/10' : 'text-blue-400 bg-blue-500/10'
+                                            }`}>{issue.status.replace('_', ' ')}</span>
+                                    </div>
+                                </div>
+                            ))
+                        ) : (
+                            <div className="text-center py-10 text-gray-500">
+                                No high priority issues found.
+                            </div>
+                        )}
+                    </div>
+                </GlassCard>
             </div>
         </div>
     );
