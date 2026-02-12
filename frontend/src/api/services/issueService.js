@@ -53,4 +53,9 @@ export const issueService = {
     const res = await api.get("/contractor/profile");
     return res.data;
   },
+
+  submitCostEstimate: async (data) => {
+    const res = await api.post("/issue/submit-cost-estimate", data);
+    return res.data;
+  },
 };
