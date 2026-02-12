@@ -6,6 +6,7 @@ import { useAuth } from '../../context/AuthContext';
 import Button from '../../components/common/Button';
 import Input from '../../components/common/Input';
 import GlassCard from '../../components/common/GlassCard';
+import ParticleBackground from '../../components/ParticleBackground';
 
 const Login = () => {
     const location = useLocation();
@@ -59,9 +60,7 @@ const Login = () => {
     return (
         <div className="fixed inset-0 w-screen h-screen flex items-center justify-center p-4 overflow-hidden bg-[#0f172a]">
             {/* Animated Background Elements */}
-            <div className="absolute inset-0 bg-linear-to-br from-[#0f172a] via-[#1e1b4b] to-[#0f172a]" />
-            <div className="absolute top-[-20%] left-[-10%] w-[600px] h-[600px] bg-indigo-600/20 rounded-full blur-[120px] animate-pulse-slow" />
-            <div className="absolute bottom-[-20%] right-[-10%] w-[600px] h-[600px] bg-purple-600/20 rounded-full blur-[120px] animate-pulse-slow delay-1000" />
+            <ParticleBackground />
 
             {/* Grid Pattern Overlay */}
             <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-20" />
@@ -155,7 +154,7 @@ const Login = () => {
 
                             <Button
                                 type="submit"
-                                className="w-full bg-linear-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white font-bold py-3.5 rounded-xl shadow-lg shadow-indigo-500/25 border-none text-lg transition-all duration-300 hover:scale-[1.02] active:scale-[0.98]"
+                                className="w-full bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white font-bold py-3.5 rounded-xl shadow-lg shadow-indigo-500/25 border-none text-lg transition-all duration-300 hover:scale-[1.02] active:scale-[0.98]"
                                 isLoading={loading}
                             >
                                 Sign In as {roles.find(r => r.id === role)?.label}
