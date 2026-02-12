@@ -27,11 +27,14 @@ import SuperAdminDashboard from './pages/admin/SuperAdminDashboard';
 import ContractorDashboard from './pages/contractor/Dashboard';
 import CompletedTasks from './pages/contractor/CompletedTasks';
 
+import ParticleBackground from './components/ParticleBackground';
+
 function App() {
   return (
     <Router>
       <AuthProvider>
-        <div className="min-h-screen text-white font-sans">
+        <ParticleBackground />
+        <div className="min-h-screen text-white font-sans relative z-10">
           <Toaster position="top-right" />
           <Routes>
             {/* Public Routes */}
