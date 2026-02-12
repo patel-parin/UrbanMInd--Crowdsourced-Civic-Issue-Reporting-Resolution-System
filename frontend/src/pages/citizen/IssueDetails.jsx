@@ -9,6 +9,7 @@ import {
   Clock,
   CheckCircle,
   AlertTriangle,
+  Mic,
 } from "lucide-react";
 
 import Button from "../../components/common/Button";
@@ -83,6 +84,19 @@ const IssueDetails = () => {
             <Card className="mb-6">
               <h3 className="text-lg font-bold text-white mb-3">Description</h3>
               <p className="text-gray-300 leading-relaxed">{issue.description}</p>
+
+              {issue.voiceNoteUrl && (
+                <div className="mt-4 p-4 bg-indigo-500/10 border border-indigo-500/20 rounded-xl">
+                  <h4 className="text-sm font-bold text-indigo-300 mb-2 flex items-center gap-2">
+                    <Mic className="w-4 h-4" /> Voice Note
+                  </h4>
+                  <audio
+                    controls
+                    className="w-full h-8"
+                    src={issue.voiceNoteUrl.startsWith('/uploads') ? `${import.meta.env.VITE_API_URL}${issue.voiceNoteUrl}` : issue.voiceNoteUrl}
+                  />
+                </div>
+              )}
             </Card>
 
             {/* TIMELINE */}
@@ -92,11 +106,10 @@ const IssueDetails = () => {
                 {(issue.updates || []).map((update, index) => (
                   <div key={index} className="relative pl-8">
                     <div
-                      className={`absolute left-0 top-1 w-4 h-4 rounded-full border-2 border-gray-900 ${
-                        index === issue.updates.length - 1
-                          ? "bg-blue-500"
-                          : "bg-gray-600"
-                      }`}
+                      className={`absolute left-0 top-1 w-4 h-4 rounded-full border-2 border-gray-900 ${index === issue.updates.length - 1
+                        ? "bg-blue-500"
+                        : "bg-gray-600"
+                        }`}
                     />
                     <p className="text-sm text-gray-400 mb-1">{update.date}</p>
                     <h4 className="text-white font-medium capitalize mb-1">
@@ -116,13 +129,12 @@ const IssueDetails = () => {
           <Card>
             <div className="mb-6">
               <span
-                className={`inline-flex items-center px-4 py-2 rounded-full text-sm font-bold uppercase tracking-wider ${
-                  issue.status === "resolved"
-                    ? "bg-green-500/20 text-green-400"
-                    : issue.status === "pending"
+                className={`inline-flex items-center px-4 py-2 rounded-full text-sm font-bold uppercase tracking-wider ${issue.status === "resolved"
+                  ? "bg-green-500/20 text-green-400"
+                  : issue.status === "pending"
                     ? "bg-orange-500/20 text-orange-400"
                     : "bg-blue-500/20 text-blue-400"
-                }`}
+                  }`}
               >
                 {issue.status === "resolved" && <CheckCircle className="w-4 h-4 mr-2" />}
                 {issue.status === "pending" && <AlertTriangle className="w-4 h-4 mr-2" />}
@@ -173,18 +185,19 @@ const IssueDetails = () => {
 
           {/* MAP PREVIEW */}
           <Card className="h-64 bg-gray-800 p-2">
-  {issue.gps?.lat && issue.gps?.lng ? (
-    <IssueMap
-      lat={issue.gps.lat}
-      lng={issue.gps.lng}
-      title={issue.title}
-    />
-  ) : (
-    <div className="flex items-center justify-center h-full text-gray-400">
-      No GPS location available
-    </div>
-  )}
-</Card>
+            {issue.gps?.lat && issue.gps?.lng ? (
+              <IssueMap
+                lat={issue.gps.lat}
+                lng={issue.gps.lng}
+                title={issue.title}
+              />
+            ) : (
+              <div className="flex items-center justify-center h-full text-gray-400">
+                No GPS location available
+              </div>
+            )}
+          </Card>
+
 
         </div>
       </div>
