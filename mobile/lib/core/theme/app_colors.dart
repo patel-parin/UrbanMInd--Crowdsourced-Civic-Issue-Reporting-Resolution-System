@@ -1,34 +1,65 @@
 import 'package:flutter/material.dart';
 
 class AppColors {
-  // Primary Brand Colors
-  static const Color primary = Color(0xFF2563EB); // Vivid Blue
-  static const Color primaryDark = Color(0xFF1E40AF);
-  static const Color primaryLight = Color(0xFF60A5FA);
+  //  Backgrounds (Rich Navy/Slate)
+  static const Color background = Color(0xFF0B1121); // Deepest Navy
+  static const Color surface = Color(0xFF151E32); // Lighter Navy
+  static const Color surfaceLight = Color(0xFF2A3655); // Highlight
 
-  // Secondary/Accent Colors
-  static const Color accent = Color(0xFF0F172A); // Slate 900
-  static const Color secondary = Color(0xFF64748B); // Slate 500
+  // Primary (Electric & Vibrant)
+  static const Color primary = Color(0xFF6366F1); // Electric Indigo
+  static const Color primaryDark = Color(0xFF4338CA);
+  static const Color primaryLight = Color(0xFF818CF8);
 
-  // Functional Colors
-  static const Color success = Color(0xFF10B981); // Emerald 500
-  static const Color error = Color(0xFFEF4444); // Red 500
-  static const Color warning = Color(0xFFF59E0B); // Amber 500
-  static const Color info = Color(0xFF3B82F6); // Blue 500
+  // Accents (Neon Pop)
+  static const Color accent = Color(0xFF06B6D4); // Cyan Neon
+  static const Color accentPink = Color(0xFFEC4899); // Hot Pink
+  static const Color accentAmber = Color(0xFFF59E0B); // Amber glow
 
-  // Background Colors
-  static const Color background = Color(0xFFF8FAFC); // Slate 50
-  static const Color surface = Colors.white;
-  static const Color surfaceVariant = Color(0xFFF1F5F9); // Slate 100
+  // Functional
+  static const Color success = Color(0xFF10B981); // Emerald
+  static const Color error = Color(0xFFEF4444); // Red
+  static const Color warning = Color(0xFFF59E0B); // Amber
+  static const Color info = Color(0xFF3B82F6); // Blue
 
-  // Text Colors
-  static const Color textPrimary = Color(0xFF0F172A); // Slate 900
-  static const Color textSecondary = Color(0xFF64748B); // Slate 500
-  static const Color textInverse = Colors.white;
+  // Text
+  static const Color textPrimary = Colors.white;
+  static const Color textSecondary = Color(0xFF94A3B8); // Slate 400
+  static const Color textInverse = Color(0xFF0F172A);
 
-  // Gradients
+  // Premium Gradients
   static const LinearGradient primaryGradient = LinearGradient(
-    colors: [Color(0xFF2563EB), Color(0xFF1E40AF)],
+    colors: [
+      Color(0xFF0B1121), // Deepest Navy
+      Color(0xFF1E1B4B), // Rich Indigo
+    ],
+    begin: Alignment.topLeft,
+    end: Alignment.bottomRight,
+  );
+
+  static const LinearGradient cardGradient = LinearGradient(
+    colors: [
+      Color(0xCC151E32), // Translucent Navy
+      Color(0x990B1121), // Translucent Darker
+    ],
+    begin: Alignment.topLeft,
+    end: Alignment.bottomRight,
+  );
+
+  static const LinearGradient accentGradient = LinearGradient(
+    colors: [
+      Color(0xFF6366F1), // Indigo
+      Color(0xFFEC4899), // Pink
+    ],
+    begin: Alignment.centerLeft,
+    end: Alignment.centerRight,
+  );
+
+  static const LinearGradient glassGradient = LinearGradient(
+    colors: [
+      Color(0xCC2A3655), // Lighter surface
+      Color(0x66151E32), // Darker surface
+    ],
     begin: Alignment.topLeft,
     end: Alignment.bottomRight,
   );

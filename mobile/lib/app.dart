@@ -4,6 +4,7 @@ import 'features/auth/providers/auth_provider.dart';
 import 'features/home/providers/home_provider.dart';
 import 'routes/app_routes.dart';
 import 'core/theme/app_theme.dart';
+import 'core/services/socket_service.dart';
 
 class UrbanMindApp extends StatelessWidget {
   const UrbanMindApp({super.key});
@@ -12,8 +13,17 @@ class UrbanMindApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MultiProvider(
       providers: [
+        Provider<SocketService>(
+          create: (_) => SocketService()..initSocket(),
+          dispose: (_, service) => service.dispose(),
+        ),
         ChangeNotifierProvider(create: (_) => AuthProvider()),
-        ChangeNotifierProvider(create: (_) => HomeProvider()),
+        ChangeNotifierProxyProvider<SocketService, HomeProvider>(
+          create: (context) =>
+              HomeProvider(socketService: context.read<SocketService>()),
+          update: (_, socketService, previous) =>
+              HomeProvider(socketService: socketService),
+        ),
       ],
       child: MaterialApp(
         title: 'UrbanMind',
