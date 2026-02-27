@@ -154,7 +154,7 @@ const Login = () => {
 
                             <Button
                                 type="submit"
-                                className="w-full bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white font-bold py-3.5 rounded-xl shadow-lg shadow-indigo-500/25 border-none text-lg transition-all duration-300 hover:scale-[1.02] active:scale-[0.98]"
+                                className="w-full bg-linear-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white font-bold py-3.5 rounded-xl shadow-lg shadow-indigo-500/25 border-none text-lg transition-all duration-300 hover:scale-[1.02] active:scale-[0.98]"
                                 isLoading={loading}
                             >
                                 Sign In as {roles.find(r => r.id === role)?.label}

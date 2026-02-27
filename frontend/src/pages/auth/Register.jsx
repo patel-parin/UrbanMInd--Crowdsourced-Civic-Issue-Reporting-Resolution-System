@@ -381,7 +381,7 @@ const Register = () => {
               {/* Submit */}
               <Button
                 type="submit"
-                className="w-full bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white font-bold py-3.5 rounded-xl shadow-lg transition-all duration-300 hover:scale-[1.02]"
+                className="w-full bg-linear-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white font-bold py-3.5 rounded-xl shadow-lg transition-all duration-300 hover:scale-[1.02]"
                 isLoading={loading}
               >
                 Create Account
