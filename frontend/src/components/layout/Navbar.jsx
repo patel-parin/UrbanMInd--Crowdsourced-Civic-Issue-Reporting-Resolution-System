@@ -67,7 +67,7 @@ const Navbar = ({ toggleSidebar }) => {
                             <p className="text-xs text-indigo-400 capitalize font-medium tracking-wide">{user.role}</p>
                         </div>
                         <div className="relative group cursor-pointer">
-                            <div className="w-10 h-10 rounded-full bg-linear-to-br from-gray-700 to-gray-800 p-[2px] group-hover:from-indigo-500 group-hover:to-purple-500 transition-all duration-300">
+                            <div className="w-10 h-10 rounded-full bg-linear-to-br from-gray-700 to-gray-800 p-0.5 group-hover:from-indigo-500 group-hover:to-purple-500 transition-all duration-300">
                                 <div className="w-full h-full rounded-full bg-[#0f172a] flex items-center justify-center">
                                     <User className="w-5 h-5 text-gray-300 group-hover:text-white transition-colors" />
                                 </div>
