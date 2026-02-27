@@ -44,7 +44,7 @@ const issueSchema = new mongoose.Schema(
     },
     city: { type: String }, // To assign to City Admin
     upvotes: { type: Number, default: 0 },
-    contractorId: { type: mongoose.Schema.Types.ObjectId, ref: "Contractor" },
+    contractorId: { type: mongoose.Schema.Types.ObjectId, ref: "User" }, // Changed ref to User (role: contractor)
   },
   { timestamps: true }
 );

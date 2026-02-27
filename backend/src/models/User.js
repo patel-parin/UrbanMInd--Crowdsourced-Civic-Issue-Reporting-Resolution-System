@@ -11,6 +11,7 @@ const userSchema = new mongoose.Schema(
       enum: ["citizen", "admin", "contractor", "superadmin"],
       default: "citizen",
     },
+    // Location Fields
     city: { type: String }, // Lowest level (Village/City)
     state: { type: String },
     district: { type: String },
@@ -18,6 +19,14 @@ const userSchema = new mongoose.Schema(
     isSuperAdmin: { type: Boolean, default: false },
     impactPoints: { type: Number, default: 0 },
     citizenLevel: { type: Number, default: 1 },
+
+    // Contractor Specific Fields
+    companyName: String,
+    assignedTasks: [{ type: mongoose.Schema.Types.ObjectId, ref: "Issue" }],
+    rating: { type: Number, default: 0 },
+    completedTasks: { type: Number, default: 0 },
+    efficiency: { type: Number, default: 0 }, // Percentage or score
+    costPerTask: { type: Number, default: 0 }, // Average cost
   },
   { timestamps: true }
 );
