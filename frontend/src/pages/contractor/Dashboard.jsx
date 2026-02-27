@@ -113,7 +113,7 @@ const ContractorDashboard = () => {
             {/* Header & Welcome */}
             <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-4">
                 <div>
-                    <h1 className="text-4xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-white to-indigo-200 mb-2">
+                    <h1 className="text-4xl font-bold bg-clip-text text-transparent bg-linear-to-r from-white to-indigo-200 mb-2">
                         Welcome, {profile?.companyName || 'Contractor'}
                     </h1>
                     <p className="text-gray-400 text-lg">Here's your performance overview and active work.</p>
@@ -211,7 +211,7 @@ const ContractorDashboard = () => {
                                             </div>
                                         </div>
 
-                                        <div className="flex flex-col items-end justify-center gap-3 min-w-[160px] border-l border-white/5 pl-6 md:pl-6">
+                                        <div className="flex flex-col items-end justify-center gap-3 min-w-40 border-l border-white/5 pl-6 md:pl-6">
                                             <div className="text-right w-full">
                                                 <span className="text-xs font-bold uppercase tracking-wider text-gray-500 block mb-1">Current Status</span>
                                                 <span className={`inline-block font-bold capitalize px-3 py-1 rounded-lg text-sm w-full text-center ${task.status === 'fund_approval_pending' ? 'bg-orange-500/20 text-orange-400 border border-orange-500/20' :
@@ -362,7 +362,7 @@ const ContractorDashboard = () => {
                                 </Button>
                                 <Button
                                     type="submit"
-                                    className="flex-1 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 border-none shadow-lg shadow-indigo-500/25"
+                                    className="flex-1 bg-linear-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 border-none shadow-lg shadow-indigo-500/25"
                                 >
                                     Submit Estimate
                                 </Button>

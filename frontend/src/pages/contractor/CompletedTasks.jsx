@@ -43,7 +43,7 @@ const CompletedTasks = () => {
             >
                 <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-8">
                     <div>
-                        <h1 className="text-4xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-white to-indigo-200 mb-2">
+                        <h1 className="text-4xl font-bold bg-clip-text text-transparent bg-linear-to-r from-white to-indigo-200 mb-2">
                             Completed Tasks
                         </h1>
                         <p className="text-gray-400 text-lg">History of your resolved issues and impact.</p>
