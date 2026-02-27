@@ -57,7 +57,7 @@ const Sidebar = () => {
                             clsx(
                                 "relative group p-3 rounded-xl transition-all duration-300",
                                 isActive
-                                    ? "bg-gradient-to-br from-indigo-600 to-purple-600 text-white shadow-lg shadow-indigo-500/30 scale-110"
+                                    ? "bg-linear-to-br from-indigo-600 to-purple-600 text-white shadow-lg shadow-indigo-500/30 scale-110"
                                     : "text-gray-400 hover:text-white hover:bg-white/10 hover:scale-105"
                             )
                         }

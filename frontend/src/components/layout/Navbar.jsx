@@ -10,7 +10,7 @@ const Navbar = ({ toggleSidebar }) => {
         <nav className="fixed top-0 w-full z-40 h-20 px-6 flex items-center justify-between bg-[#0f172a]/80 backdrop-blur-xl border-b border-white/5">
             <div className="flex items-center gap-4">
                 <Link to="/" className="flex items-center gap-3 group">
-                    <div className="w-10 h-10 bg-gradient-to-br from-indigo-600 to-purple-600 rounded-xl flex items-center justify-center shadow-lg shadow-indigo-500/20 group-hover:shadow-indigo-500/40 transition-all duration-300">
+                    <div className="w-10 h-10 bg-linear-to-br from-indigo-600 to-purple-600 rounded-xl flex items-center justify-center shadow-lg shadow-indigo-500/20 group-hover:shadow-indigo-500/40 transition-all duration-300">
                         <span className="text-white text-xl font-bold">U</span>
                     </div>
                     <div>
@@ -67,7 +67,7 @@ const Navbar = ({ toggleSidebar }) => {
                             <p className="text-xs text-indigo-400 capitalize font-medium tracking-wide">{user.role}</p>
                         </div>
                         <div className="relative group cursor-pointer">
-                            <div className="w-10 h-10 rounded-full bg-gradient-to-br from-gray-700 to-gray-800 p-[2px] group-hover:from-indigo-500 group-hover:to-purple-500 transition-all duration-300">
+                            <div className="w-10 h-10 rounded-full bg-linear-to-br from-gray-700 to-gray-800 p-[2px] group-hover:from-indigo-500 group-hover:to-purple-500 transition-all duration-300">
                                 <div className="w-full h-full rounded-full bg-[#0f172a] flex items-center justify-center">
                                     <User className="w-5 h-5 text-gray-300 group-hover:text-white transition-colors" />
                                 </div>
