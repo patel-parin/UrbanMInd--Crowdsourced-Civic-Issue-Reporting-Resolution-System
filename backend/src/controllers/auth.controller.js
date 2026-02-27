@@ -1,5 +1,4 @@
 import User from "../models/User.js";
-import Contractor from "../models/Contractor.js";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import keys from "../config/keys.js";
@@ -26,19 +25,18 @@ export const register = async (req, res) => {
       city: city || "Unknown",
       state,
       district,
-      taluka
-    });
-
-    if (role === "contractor") {
-      await Contractor.create({
-        companyName: name,
-        userId: user._id,
+      taluka,
+      // Initialize contractor fields if role is contractor
+      ...(role === 'contractor' && {
+        companyName: name, // Default company name to user name
         rating: 0,
         completedTasks: 0,
         efficiency: 0,
         costPerTask: 0
-      });
-    }
+      })
+    });
+
+    // No need to create separate Contractor document anymore
 
     res.json({ message: "User Registered", user });
   } catch (err) {

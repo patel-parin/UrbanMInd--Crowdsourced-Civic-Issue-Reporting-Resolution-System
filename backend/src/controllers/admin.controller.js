@@ -1,5 +1,4 @@
 import Issue from "../models/Issue.js";
-import Contractor from "../models/Contractor.js";
 import Assignment from "../models/Assignment.js";
 import User from "../models/User.js";
 
@@ -63,12 +62,23 @@ export const getContractors = async (req, res) => {
     // This is slightly complex because city is on the User model.
     // Simpler approach: Fetch all contractors, populate user, then filter.
 
-    let contractors = await Contractor.find().populate('userId', 'name email city role');
+    // Use User model for contractors
+    let contractors = await User.find({ role: 'contractor' });
+
+    console.log(`[DEBUG] Admin: ${req.user.name}, Role: ${req.user.role}, City: ${req.user.city}`);
+    console.log(`[DEBUG] Total Contractors Found: ${contractors.length}`);
 
     if (!isSuperAdmin) {
       if (adminCity && adminCity !== 'Unknown') {
-        contractors = contractors.filter(c => c.userId && c.userId.city === adminCity);
+        const beforeCount = contractors.length;
+        contractors = contractors.filter(c => {
+          const match = c.city && c.city.toLowerCase() === adminCity.toLowerCase();
+          // console.log(`[DEBUG] Contractor ${c.name} (${c.city}) vs Admin (${adminCity}) => Match: ${match}`);
+          return match;
+        });
+        console.log(`[DEBUG] Filtered Contractors: ${beforeCount} -> ${contractors.length}`);
       } else {
+        console.log('[DEBUG] Admin has no city or is Unknown, returning empty list.');
         return res.json([]);
       }
     }
@@ -107,9 +117,9 @@ export const getContractors = async (req, res) => {
 
       return {
         _id: contractor._id,
-        companyName: contractor.companyName,
-        email: contractor.userId?.email,
-        name: contractor.userId?.name,
+        companyName: contractor.companyName || contractor.name,
+        email: contractor.email,
+        name: contractor.name,
         efficiency,
         rating,
         completedTasks,
