@@ -87,7 +87,7 @@ const Analytics = () => {
 
             {/* Key Metrics */}
             <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-                <Card className="bg-gradient-to-br from-indigo-900/50 to-slate-900 border-indigo-500/30">
+                <Card className="bg-linear-to-br from-indigo-900/50 to-slate-900 border-indigo-500/30">
                     <div className="flex items-center gap-4">
                         <div className="p-3 bg-indigo-500/20 rounded-xl text-indigo-400">
                             <Activity className="w-6 h-6" />
@@ -98,7 +98,7 @@ const Analytics = () => {
                         </div>
                     </div>
                 </Card>
-                <Card className="bg-gradient-to-br from-orange-900/50 to-slate-900 border-orange-500/30">
+                <Card className="bg-linear-to-br from-orange-900/50 to-slate-900 border-orange-500/30">
                     <div className="flex items-center gap-4">
                         <div className="p-3 bg-orange-500/20 rounded-xl text-orange-400">
                             <Activity className="w-6 h-6" />
@@ -109,7 +109,7 @@ const Analytics = () => {
                         </div>
                     </div>
                 </Card>
-                <Card className="bg-gradient-to-br from-blue-900/50 to-slate-900 border-blue-500/30">
+                <Card className="bg-linear-to-br from-blue-900/50 to-slate-900 border-blue-500/30">
                     <div className="flex items-center gap-4">
                         <div className="p-3 bg-blue-500/20 rounded-xl text-blue-400">
                             <TrendingUp className="w-6 h-6" />
@@ -120,7 +120,7 @@ const Analytics = () => {
                         </div>
                     </div>
                 </Card>
-                <Card className="bg-gradient-to-br from-green-900/50 to-slate-900 border-green-500/30">
+                <Card className="bg-linear-to-br from-green-900/50 to-slate-900 border-green-500/30">
                     <div className="flex items-center gap-4">
                         <div className="p-3 bg-green-500/20 rounded-xl text-green-400">
                             <Activity className="w-6 h-6" />
@@ -132,7 +132,7 @@ const Analytics = () => {
                     </div>
                 </Card>
 
-                <Card className="bg-gradient-to-br from-emerald-900/50 to-slate-900 border-emerald-500/30">
+                <Card className="bg-linear-to-br from-emerald-900/50 to-slate-900 border-emerald-500/30">
                     <div className="flex items-center gap-4">
                         <div className="p-3 bg-emerald-500/20 rounded-xl text-emerald-400">
                             <DollarSign className="w-6 h-6" />
@@ -161,7 +161,7 @@ const Analytics = () => {
                                 </div>
                                 <div className="h-3 bg-gray-700 rounded-full overflow-hidden">
                                     <div
-                                        className="h-full bg-gradient-to-r from-indigo-500 to-purple-500 rounded-full transition-all duration-1000 ease-out"
+                                        className="h-full bg-linear-to-r from-indigo-500 to-purple-500 rounded-full transition-all duration-1000 ease-out"
                                         style={{ width: `${(count / maxCategoryCount) * 100}%` }}
                                     />
                                 </div>

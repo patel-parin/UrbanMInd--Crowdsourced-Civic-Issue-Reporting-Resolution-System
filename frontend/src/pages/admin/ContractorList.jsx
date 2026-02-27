@@ -52,7 +52,7 @@ const ContractorList = () => {
             {/* Header Section */}
             <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                 <div>
-                    <h1 className="text-4xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-white to-indigo-200 mb-2">
+                    <h1 className="text-4xl font-bold bg-clip-text text-transparent bg-linear-to-r from-white to-indigo-200 mb-2">
                         Contractors
                     </h1>
                     <p className="text-gray-400">Manage workforce performance and metrics</p>
@@ -114,7 +114,7 @@ const ContractorList = () => {
 
                             {/* Profile Header */}
                             <div className="flex items-center gap-4 mb-6">
-                                <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-indigo-500 to-purple-600 p-[2px]">
+                                <div className="w-16 h-16 rounded-2xl bg-linear-to-br from-indigo-500 to-purple-600 p-0.5">
                                     <div className="w-full h-full bg-[#1a1f2e] rounded-xl flex items-center justify-center text-2xl font-bold text-white">
                                         {contractor.companyName?.charAt(0).toUpperCase() || <Users className="w-8 h-8" />}
                                     </div>

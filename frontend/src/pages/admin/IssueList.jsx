@@ -127,7 +127,7 @@ const IssueList = () => {
         <div className="p-6 space-y-8 animate-fade-in">
             <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                 <div>
-                    <h1 className="text-4xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-white to-indigo-200 mb-2">
+                    <h1 className="text-4xl font-bold bg-clip-text text-transparent bg-linear-to-r from-white to-indigo-200 mb-2">
                         Issue Management
                     </h1>
                     <p className="text-gray-400">Track and resolve community reports</p>
@@ -200,7 +200,7 @@ const IssueList = () => {
                                     </td>
                                     <td className="px-6 py-4">
                                         <div className="flex items-center gap-2">
-                                            <div className="w-6 h-6 rounded-full bg-gradient-to-br from-gray-700 to-gray-600 flex items-center justify-center text-xs font-bold text-white">
+                                            <div className="w-6 h-6 rounded-full bg-linear-to-br from-gray-700 to-gray-600 flex items-center justify-center text-xs font-bold text-white">
                                                 {(issue.userId?.name || 'A').charAt(0)}
                                             </div>
                                             <span className="text-gray-300 text-sm">{issue.userId?.name || 'Anonymous'}</span>
@@ -317,7 +317,7 @@ const IssueList = () => {
                                                 className="w-full flex items-center justify-between p-3 rounded-xl bg-white/5 hover:bg-white/10 border border-white/5 hover:border-indigo-500/30 transition-all duration-300 text-left group"
                                             >
                                                 <div className="flex items-center gap-3">
-                                                    <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-500/20 to-purple-500/20 flex items-center justify-center text-indigo-400 font-bold border border-indigo-500/20 group-hover:border-indigo-500/50 transition-colors">
+                                                    <div className="w-10 h-10 rounded-xl bg-linear-to-br from-indigo-500/20 to-purple-500/20 flex items-center justify-center text-indigo-400 font-bold border border-indigo-500/20 group-hover:border-indigo-500/50 transition-colors">
                                                         {contractor.companyName?.charAt(0) || 'C'}
                                                     </div>
                                                     <div>

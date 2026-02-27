@@ -70,7 +70,7 @@ const AdminDashboard = () => {
         <div className="p-6 space-y-8 animate-fade-in">
             <div className="flex justify-between items-end mb-8">
                 <div>
-                    <h1 className="text-4xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-white to-indigo-200 mb-2">
+                    <h1 className="text-4xl font-bold bg-clip-text text-transparent bg-linear-to-r from-white to-indigo-200 mb-2">
                         Dashboard
                     </h1>
                     <p className="text-gray-400">Real-time overview of system performance</p>
