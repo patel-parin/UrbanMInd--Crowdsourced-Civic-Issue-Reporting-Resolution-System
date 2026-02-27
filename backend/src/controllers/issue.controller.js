@@ -1,5 +1,4 @@
 import Issue from "../models/Issue.js";
-import Contractor from "../models/Contractor.js";
 import User from "../models/User.js";
 import { classifyImage } from "../utils/aiClassifier.js";
 import fetch from "node-fetch";
@@ -41,7 +40,7 @@ export const createIssue = async (req, res) => {
       priority: priority || "medium",
       category: "General",
       gps: { lat, lng, address },
-      city
+      city: city || "Unknown City" // Ensure fallback
     });
 
     const user = await User.findById(req.user.id);
@@ -64,19 +63,35 @@ export const getAllIssues = async (req, res) => {
     // Super Admin sees everything
     if (req.user.role === 'superadmin') {
       // No filter
-    } else {
-      // Filter by city if user has one, otherwise show all (or maybe limit?)
-      // For now, to ensure data shows up, we'll only filter if both user and issue have city data
+    } else if (req.user.role === 'admin') {
+      // City Admin sees their city AND Unknown City issues (to catch failed geocodes)
       if (req.user.city && req.user.city !== 'Unknown') {
-        // Optional: make this less strict or allow viewing all for now
-        // query.city = req.user.city; 
-        // Commenting out strict filtering to ensure "Live City Issues" works for demo
+        const cityRegex = new RegExp(`^${req.user.city}$`, 'i');
+        query.$or = [
+          { city: cityRegex },
+          { city: "Unknown City" },
+          { city: null }
+        ];
+      }
+    } else if (req.user.role === 'citizen') {
+      // Citizens see issues in their city (for map and list)
+      // If lat/lng provided, use that to determine city
+      if (req.query.lat && req.query.lng) {
+        const cityIndex = await getCityFromCoordinates(req.query.lat, req.query.lng);
+        if (cityIndex && cityIndex !== 'Unknown City') {
+          query.city = new RegExp(`^${cityIndex}$`, 'i');
+        } else if (req.user.city && req.user.city !== 'Unknown') {
+          query.city = new RegExp(`^${req.user.city}$`, 'i');
+        }
+      } else if (req.user.city && req.user.city !== 'Unknown') {
+        // Fallback to user profile city
+        query.city = new RegExp(`^${req.user.city}$`, 'i');
       }
     }
 
     const issues = await Issue.find(query)
       .populate("userId", "name email")
-      .populate("contractorId", "companyName")
+      .populate("contractorId", "name companyName") // Now referencing User model
       .sort({ createdAt: -1 });
     res.json(issues);
   } catch (err) {
@@ -154,7 +169,7 @@ export const assignIssue = async (req, res) => {
     const issue = await Issue.findById(issueId);
     if (!issue) return res.status(404).json({ message: "Issue not found" });
 
-    const contractor = await Contractor.findById(contractorId);
+    const contractor = await User.findOne({ _id: contractorId, role: 'contractor' });
     if (!contractor) return res.status(404).json({ message: "Contractor not found" });
 
     issue.contractorId = contractorId;
@@ -200,7 +215,17 @@ export const updateIssueStatus = async (req, res) => {
 export const getCityFromCoordinates = async (lat, lng) => {
   try {
     const url = `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&zoom=10&addressdetails=1`;
-    const response = await fetch(url);
+    // Add User-Agent header as required by OSM Nominatim Usage Policy
+    const response = await fetch(url, {
+      headers: {
+        'User-Agent': 'UrbanMind-Civic-App/1.0 (contact@urbanmind.com)'
+      }
+    });
+
+    if (!response.ok) {
+      throw new Error(`Nominatim API error: ${response.statusText}`);
+    }
+
     const data = await response.json();
 
     return (
