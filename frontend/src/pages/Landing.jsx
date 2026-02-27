@@ -18,10 +18,10 @@ const Landing = () => {
             {/* Navbar */}
             <nav className="relative z-50 px-6 py-6 md:px-12 flex justify-between items-center max-w-7xl mx-auto">
                 <div className="flex items-center gap-2">
-                    <div className="w-10 h-10 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-xl flex items-center justify-center shadow-lg shadow-indigo-500/20">
+                    <div className="w-10 h-10 bg-linear-to-br from-indigo-500 to-purple-600 rounded-xl flex items-center justify-center shadow-lg shadow-indigo-500/20">
                         <span className="text-white font-bold text-xl">U</span>
                     </div>
-                    <span className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-white to-gray-400">
+                    <span className="text-2xl font-bold bg-clip-text text-transparent bg-linear-to-r from-white to-gray-400">
                         UrbanMind
                     </span>
                 </div>
@@ -56,7 +56,7 @@ const Landing = () => {
 
                     <h1 className="text-5xl md:text-7xl font-bold text-white mb-6 leading-tight tracking-tight">
                         Building Better Cities,<br />
-                        <span className="bg-clip-text text-transparent bg-gradient-to-r from-indigo-400 via-purple-400 to-pink-400">
+                        <span className="bg-clip-text text-transparent bg-linear-to-r from-indigo-400 via-purple-400 to-pink-400">
                             Together.
                         </span>
                     </h1>
@@ -67,7 +67,7 @@ const Landing = () => {
 
                     <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
                         <Link to="/register">
-                            <Button size="lg" className="bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 border-none shadow-lg shadow-indigo-500/25 px-8 h-14 text-lg">
+                            <Button size="lg" className="bg-linear-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 border-none shadow-lg shadow-indigo-500/25 px-8 h-14 text-lg">
                                 Start Reporting
                                 <ArrowRight className="ml-2 w-5 h-5" />
                             </Button>
@@ -139,7 +139,7 @@ const Landing = () => {
 
                     <div className="grid grid-cols-1 md:grid-cols-4 gap-8 relative">
                         {/* Connecting Line (Desktop) */}
-                        <div className="hidden md:block absolute top-1/2 left-0 w-full h-0.5 bg-gradient-to-r from-indigo-500/0 via-indigo-500/50 to-indigo-500/0 -translate-y-1/2 z-0" />
+                        <div className="hidden md:block absolute top-1/2 left-0 w-full h-0.5 bg-linear-to-r from-indigo-500/0 via-indigo-500/50 to-indigo-500/0 -translate-y-1/2 z-0" />
 
                         {[
                             { step: "01", title: "Report", desc: "Snap a photo and tag location", icon: MapPin },
@@ -194,7 +194,7 @@ const Landing = () => {
             <footer className="border-t border-white/10 bg-[#0f172a] py-12 relative z-10">
                 <div className="max-w-7xl mx-auto px-6 md:px-12 flex flex-col md:flex-row justify-between items-center gap-6">
                     <div className="flex items-center gap-2">
-                        <div className="w-8 h-8 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-lg flex items-center justify-center">
+                        <div className="w-8 h-8 bg-linear-to-br from-indigo-500 to-purple-600 rounded-lg flex items-center justify-center">
                             <span className="text-white font-bold">U</span>
                         </div>
                         <span className="text-xl font-bold text-white">UrbanMind</span>
