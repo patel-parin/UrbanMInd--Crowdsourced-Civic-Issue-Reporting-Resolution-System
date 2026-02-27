@@ -9,8 +9,8 @@ export const issueService = {
     return res.data;
   },
 
-  getAll: async () => {
-    const res = await api.get("/issue/all");
+  getAll: async (params) => {
+    const res = await api.get("/issue/all", { params });
     return res.data;
   },
 
@@ -53,6 +53,7 @@ export const issueService = {
     const res = await api.get("/contractor/profile");
     return res.data;
   },
+
 
   submitCostEstimate: async (data) => {
     const res = await api.post("/issue/submit-cost-estimate", data);
