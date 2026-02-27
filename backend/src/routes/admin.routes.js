@@ -9,12 +9,12 @@ const router = express.Router();
 
 router.get("/stats", protect, getAdminStats);
 
-router.get("/contractors", protect, roleCheck(["admin"]), getContractors);
+router.get("/contractors", protect, roleCheck(["admin", "superadmin"]), getContractors);
 
 router.post(
   "/assign",
   protect,
-  roleCheck(["admin"]),
+  roleCheck(["admin", "superadmin"]),
   assignToContractor
 );
 
