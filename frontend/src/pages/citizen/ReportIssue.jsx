@@ -201,7 +201,7 @@ const ReportIssue = () => {
     return (
         <div className="max-w-3xl mx-auto p-6 animate-fade-in">
             <div className="mb-8 text-center">
-                <h1 className="text-4xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-white to-indigo-200 mb-3">
+                <h1 className="text-4xl font-bold bg-clip-text text-transparent bg-linear-to-r from-white to-indigo-200 mb-3">
                     Report an Issue
                 </h1>
                 <p className="text-gray-400 text-lg">Help improve our city by reporting problems you see.</p>
@@ -390,7 +390,7 @@ const ReportIssue = () => {
                     <div className="pt-6">
                         <Button
                             type="submit"
-                            className="w-full bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 shadow-lg shadow-indigo-500/30 border-none py-4 text-lg font-bold"
+                            className="w-full bg-linear-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 shadow-lg shadow-indigo-500/30 border-none py-4 text-lg font-bold"
                             size="lg"
                             icon={Upload}
                             isLoading={loading}

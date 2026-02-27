@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import { Plus, Clock, CheckCircle, ArrowRight, MapPin, Activity, Users, AlertTriangle } from 'lucide-react';
 import { Link } from 'react-router-dom';
-import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
+import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
 import icon from 'leaflet/dist/images/marker-icon.png';
@@ -13,6 +13,30 @@ import Button from '../../components/common/Button';
 import Loader from '../../components/common/Loader';
 import { dashboardService } from '../../api/services/dashboardService';
 import { issueService } from '../../api/services/issueService';
+
+
+// import { useMap } from 'react-leaflet';
+
+const RecenterMap = ({ location }) => {
+    const map = useMap();
+
+    useEffect(() => {
+        if (location && location[0] && location[1]) {
+            map.setView(location, 12);
+        }
+    }, [location, map]);
+
+    return null;
+};
+
+// Helper component to recenter map when user location changes
+const RecenterAutomatically = ({ lat, lng }) => {
+    const map = useMap();
+    useEffect(() => {
+        map.setView([lat, lng]);
+    }, [lat, lng, map]);
+    return null;
+};
 
 // Fix Leaflet default icon
 let DefaultIcon = L.icon({
@@ -39,39 +63,44 @@ const CitizenDashboard = () => {
     useEffect(() => {
         const fetchData = async () => {
             try {
-                // Get user location first
-                navigator.geolocation.getCurrentPosition(
-                    (position) => {
-                        setUserLocation([position.coords.latitude, position.coords.longitude]);
-                    },
-                    (error) => {
-                        console.error("Error getting location", error);
-                        // Default to a central location if denied (e.g., India center)
-                        setUserLocation([20.5937, 78.9629]);
-                    }
-                );
-
-                const [statsData, issuesData, allIssues] = await Promise.all([
+                // Parallel fetch for stats and my issues (independent of location)
+                const [statsData, issuesData] = await Promise.all([
                     dashboardService.getStats(),
-                    issueService.getMyIssues({ limit: 5 }),
-                    issueService.getAll() // Fetch all issues for the map
+                    issueService.getMyIssues({ limit: 5 })
                 ]);
 
                 setStats(statsData);
                 setRecentIssues(issuesData);
 
-                // Use real data for nearby issues
-                setNearbyIssues(allIssues);
+                // Get user location and then fetch map issues
+                navigator.geolocation.getCurrentPosition(
+                    async (position) => {
+                        const lat = position.coords.latitude;
+                        const lng = position.coords.longitude;
+                        setUserLocation([lat, lng]);
 
-                // Calculate City Pulse Data from real issues
-                const criticalCount = allIssues.filter(i => i.priority === 'critical').length;
-                const uniqueReporters = new Set(allIssues.map(i => i.userId?._id || i.userId)).size;
-
-                setCityPulse({
-                    criticalIssues: criticalCount,
-                    activeCitizens: uniqueReporters,
-                    totalIssues: allIssues.length
-                });
+                        // Fetch issues for this location
+                        try {
+                            const mapIssues = await issueService.getAll({ lat, lng });
+                            setNearbyIssues(mapIssues);
+                            updateCityPulse(mapIssues);
+                        } catch (err) {
+                            console.error("Failed to fetch map issues", err);
+                        }
+                    },
+                    async (error) => {
+                        console.error("Error getting location", error);
+                        // Default fallback
+                        setUserLocation([20.5937, 78.9629]);
+                        try {
+                            const mapIssues = await issueService.getAll(); // Fallback to profile city
+                            setNearbyIssues(mapIssues);
+                            updateCityPulse(mapIssues);
+                        } catch (err) {
+                            console.error("Failed to fetch map issues", err);
+                        }
+                    }
+                );
 
             } catch (error) {
                 console.error('Failed to fetch dashboard data:', error);
@@ -82,6 +111,17 @@ const CitizenDashboard = () => {
 
         fetchData();
     }, []);
+
+    const updateCityPulse = (issues) => {
+        const criticalCount = issues.filter(i => i.priority === 'critical').length;
+        const uniqueReporters = new Set(issues.map(i => i.userId?._id || i.userId)).size;
+
+        setCityPulse({
+            criticalIssues: criticalCount,
+            activeCitizens: uniqueReporters,
+            totalIssues: issues.length
+        });
+    };
 
     if (loading) {
         return (
@@ -96,7 +136,7 @@ const CitizenDashboard = () => {
             {/* Header */}
             <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                 <div>
-                    <h1 className="text-4xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-white to-indigo-200 mb-2">
+                    <h1 className="text-4xl font-bold bg-clip-text text-transparent bg-linear-to-r from-white to-indigo-200 mb-2">
                         Dashboard
                     </h1>
                     <p className="text-gray-400">Welcome back, Citizen</p>
@@ -104,7 +144,7 @@ const CitizenDashboard = () => {
                 <Link to="/citizen/report">
                     <Button
                         icon={Plus}
-                        className="bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 shadow-lg shadow-indigo-500/30 border-none"
+                        className="bg-linear-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 shadow-lg shadow-indigo-500/30 border-none"
                     >
                         Report Issue
                     </Button>
@@ -171,7 +211,9 @@ const CitizenDashboard = () => {
                                     center={userLocation}
                                     zoom={12}
                                     className="h-full w-full"
+                                    style={{ height: '100%', width: '100%', minHeight: '300px' }}
                                 >
+                                    <RecenterAutomatically lat={userLocation[0]} lng={userLocation[1]} />
                                     <TileLayer
                                         url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
                                         attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>'
@@ -268,7 +310,7 @@ const CitizenDashboard = () => {
                         >
                             <GlassCard hover className="flex flex-col md:flex-row md:items-center justify-between p-5 gap-4 group">
                                 <div className="flex items-start gap-4">
-                                    <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-gray-800 to-gray-900 flex items-center justify-center border border-white/10 group-hover:border-indigo-500/30 transition-colors">
+                                    <div className="w-12 h-12 rounded-xl bg-linear-to-br from-gray-800 to-gray-900 flex items-center justify-center border border-white/10 group-hover:border-indigo-500/30 transition-colors">
                                         <MapPin className="w-6 h-6 text-gray-400 group-hover:text-indigo-400 transition-colors" />
                                     </div>
                                     <div>
