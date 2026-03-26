@@ -6,8 +6,8 @@ const issueSchema = new mongoose.Schema(
     userId: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
     title: String,
     description: String,
-    images: [{ type: String }], // Changed from single imageUrl to array
-    voiceNoteUrl: String, // New field for voice notes
+    images: [{ type: String }],
+    voiceNoteUrl: String,
     status: {
       type: String,
       enum: [
@@ -36,15 +36,32 @@ const issueSchema = new mongoose.Schema(
       total: { type: Number, default: 0 },
       description: String
     },
+    // Enhanced fund request details
+    fundRequest: {
+      purpose: { type: String, default: "" },
+      workType: { type: String, default: "" },
+      materialsList: [{ name: String, cost: Number }],
+      timeline: { type: Number, default: 0 }, // estimated days
+      notes: { type: String, default: "" }
+    },
     category: String,
     gps: {
       lat: Number,
       lng: Number,
       address: String,
     },
-    city: { type: String }, // To assign to City Admin
+    city: { type: String },
+    // Voting system
     upvotes: { type: Number, default: 0 },
-    contractorId: { type: mongoose.Schema.Types.ObjectId, ref: "User" }, // Changed ref to User (role: contractor)
+    upvotedBy: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
+    // Feedback after resolution
+    feedback: {
+      rating: { type: Number, min: 1, max: 5 },
+      comment: { type: String, default: "" },
+      userId: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
+      createdAt: { type: Date }
+    },
+    contractorId: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
   },
   { timestamps: true }
 );
