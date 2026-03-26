@@ -78,10 +78,14 @@ export const login = async (req, res) => {
     if (!match) return res.json({ message: "Incorrect Password" });
 
     const token = jwt.sign(
-      { id: user._id, role: user.role },
-      keys.jwtSecret,
-      { expiresIn: "7d" }
-    );
+  { 
+    id: user._id, 
+    role: user.role,
+    city: user.city   // 🔥 ADD THIS
+  },
+  keys.jwtSecret,
+  { expiresIn: "7d" }
+);
 
     res.json({ message: "Login Successful", token, user });
   } catch (err) {
