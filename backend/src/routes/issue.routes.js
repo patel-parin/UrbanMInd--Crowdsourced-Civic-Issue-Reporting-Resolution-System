@@ -1,6 +1,6 @@
 import express from "express";
 import { protect } from "../middleware/authMiddleware.js";
-import { createIssue, requestFunds, approveFunds, getAllIssues, assignIssue, updateIssueStatus, submitCostEstimate } from "../controllers/issue.controller.js";
+import { createIssue, requestFunds, approveFunds, getAllIssues, assignIssue, updateIssueStatus, submitCostEstimate, upvoteIssue, submitFeedback, getNearbyIssues, checkDuplicates } from "../controllers/issue.controller.js";
 import { getIssueById } from "../controllers/issue.controller.js";
 import { getMyIssues } from "../controllers/issue.controller.js";
 
@@ -14,6 +14,10 @@ router.post("/approve-funds", protect, approveFunds);
 router.post("/submit-cost-estimate", protect, submitCostEstimate);
 router.post("/assign", protect, assignIssue);
 router.post("/update-status", protect, updateIssueStatus);
+router.post("/upvote", protect, upvoteIssue);
+router.post("/feedback", protect, submitFeedback);
+router.get("/nearby", protect, getNearbyIssues);
+router.get("/check-duplicates", protect, checkDuplicates);
 router.get("/all", protect, getAllIssues);
 router.get("/my-issues", protect, getMyIssues);
 
@@ -21,3 +25,4 @@ router.get("/:id", protect, getIssueById);
 
 
 export default router;
+
