@@ -44,13 +44,16 @@ export const AuthProvider = ({ children }) => {
     const login = async (email, password) => {
           localStorage.removeItem("token");
   localStorage.removeItem("user");
+  localStorage.removeItem("city"); 
         try {
             const response = await api.post('/auth/login', { email, password });
             const { token, user } = response.data;
 
             localStorage.setItem('token', token);
             localStorage.setItem('user', JSON.stringify(user));
+            localStorage.setItem('city', user.city); 
             setUser(user);
+            console.log("LOGIN USER:", user); 
 
             toast.success('Login successful!');
 
@@ -96,6 +99,7 @@ export const AuthProvider = ({ children }) => {
     const logout = () => {
         localStorage.removeItem('token');
         localStorage.removeItem('user');
+        localStorage.removeItem('city');
         setUser(null);
         navigate('/login');
         toast.success('Logged out successfully');
