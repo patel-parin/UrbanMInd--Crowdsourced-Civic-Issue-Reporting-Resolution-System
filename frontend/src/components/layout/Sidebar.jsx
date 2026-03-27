@@ -12,6 +12,8 @@ import {
     CheckSquare,
     Upload,
     LogOut,
+    Compass,
+    Trophy,
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { clsx } from 'clsx';
@@ -24,7 +26,9 @@ const Sidebar = () => {
             { to: '/citizen/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
             { to: '/citizen/report', icon: PlusCircle, label: 'Report' },
             { to: '/citizen/history', icon: History, label: 'History' },
+            { to: '/citizen/nearby', icon: Compass, label: 'Nearby' },
             { to: '/citizen/map', icon: Map, label: 'Map' },
+            { to: '/citizen/leaderboard', icon: Trophy, label: 'Ranks' },
             { to: '/citizen/profile', icon: User, label: 'Profile' },
         ],
         admin: [
