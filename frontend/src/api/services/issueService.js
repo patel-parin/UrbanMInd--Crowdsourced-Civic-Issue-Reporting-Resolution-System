@@ -54,9 +54,34 @@ export const issueService = {
     return res.data;
   },
 
-
   submitCostEstimate: async (data) => {
     const res = await api.post("/issue/submit-cost-estimate", data);
+    return res.data;
+  },
+
+  // Upvote toggle
+  upvote: async (issueId) => {
+    const res = await api.post("/issue/upvote", { issueId });
+    return res.data;
+  },
+
+  // Submit feedback
+  submitFeedback: async (issueId, rating, comment) => {
+    const res = await api.post("/issue/feedback", { issueId, rating, comment });
+    return res.data;
+  },
+
+  // Get nearby issues
+  getNearby: async (lat, lng, radius = 10) => {
+    const res = await api.get("/issue/nearby", { params: { lat, lng, radius } });
+    return res.data;
+  },
+
+  // Check for duplicate issues
+  checkDuplicates: async (title, lat, lng) => {
+    const res = await api.get("/issue/check-duplicates", {
+      params: { title, lat, lng }
+    });
     return res.data;
   },
 };

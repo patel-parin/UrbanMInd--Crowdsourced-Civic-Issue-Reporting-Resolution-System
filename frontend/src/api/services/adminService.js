@@ -13,7 +13,7 @@ export const adminService = {
   },
 
   getContractors: async (params) => {
-    const res = await api.get("/contractor/all", { params });
+    const res = await api.get("/admin/contractors", { params });
     return res.data;
   },
 
