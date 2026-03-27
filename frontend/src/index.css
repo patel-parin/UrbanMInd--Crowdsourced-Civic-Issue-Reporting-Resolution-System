@@ -141,3 +141,13 @@ body {
 ::-webkit-scrollbar {
   display: none;
 }
+
+@keyframes mapRainbow {
+  0% { filter: hue-rotate(0deg) saturate(250%) contrast(1.1); }
+  50% { filter: hue-rotate(180deg) saturate(250%) contrast(1.1); }
+  100% { filter: hue-rotate(360deg) saturate(250%) contrast(1.1); }
+}
+
+.leaflet-tile {
+  animation: mapRainbow 10s infinite linear !important;
+}

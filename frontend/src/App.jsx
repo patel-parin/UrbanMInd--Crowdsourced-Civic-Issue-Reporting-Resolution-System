@@ -15,6 +15,8 @@ import ReportIssue from './pages/citizen/ReportIssue';
 import IssueHistory from './pages/citizen/IssueHistory';
 import IssueDetails from './pages/citizen/IssueDetails';
 import MapView from './pages/citizen/MapView';
+import NearbyIssues from './pages/citizen/NearbyIssues';
+import Leaderboard from './pages/citizen/Leaderboard';
 import Profile from './pages/citizen/Profile';
 import Layout from './components/layout/Layout';
 
@@ -55,6 +57,8 @@ function App() {
                       <Route path="history" element={<IssueHistory />} />
                       <Route path="issue/:id" element={<IssueDetails />} />
                       <Route path="map" element={<MapView />} />
+                      <Route path="nearby" element={<NearbyIssues />} />
+                      <Route path="leaderboard" element={<Leaderboard />} />
                       <Route path="profile" element={<Profile />} />
                       <Route path="*" element={<Navigate to="dashboard" replace />} />
                     </Routes>
