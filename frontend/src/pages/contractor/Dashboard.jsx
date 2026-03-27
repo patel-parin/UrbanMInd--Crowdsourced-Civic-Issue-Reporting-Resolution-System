@@ -20,7 +20,12 @@ const ContractorDashboard = () => {
         materials: '',
         labor: '',
         equipment: '',
-        description: ''
+        description: '',
+        purpose: '',
+        workType: '',
+        timeline: '',
+        notes: '',
+        materialsList: [{ name: '', cost: '' }]
     });
 
     useEffect(() => {
@@ -56,7 +61,7 @@ const ContractorDashboard = () => {
 
     const openEstimateModal = (task) => {
         setSelectedTask(task);
-        setEstimateForm({ materials: '', labor: '', equipment: '', description: '' });
+        setEstimateForm({ materials: '', labor: '', equipment: '', description: '', purpose: '', workType: '', timeline: '', notes: '', materialsList: [{ name: '', cost: '' }] });
         setIsEstimateModalOpen(true);
     };
 
@@ -65,20 +70,24 @@ const ContractorDashboard = () => {
         if (!selectedTask) return;
 
         try {
-            const { materials, labor, equipment, description } = estimateForm;
+            const { materials, labor, equipment, description, purpose, workType, timeline, notes, materialsList } = estimateForm;
             const data = {
                 issueId: selectedTask._id,
                 materials,
                 labor,
                 equipment,
-                description
+                description,
+                purpose,
+                workType,
+                timeline: Number(timeline) || 0,
+                notes,
+                materialsList: materialsList.filter(m => m.name && m.cost)
             };
 
             await issueService.submitCostEstimate(data);
 
             toast.success('Cost estimate submitted successfully');
 
-            // Optimistic update
             const total = Number(materials) + Number(labor) + Number(equipment);
             setTasks(tasks.map(t => t._id === selectedTask._id ? { ...t, status: 'fund_approval_pending', fundAmount: total } : t));
 
@@ -305,46 +314,160 @@ const ContractorDashboard = () => {
                             <p className="text-gray-400 text-sm mt-1">Provide a detailed breakdown for approval.</p>
                         </div>
 
-                        <form onSubmit={handleEstimateSubmit} className="space-y-4">
+                        <form onSubmit={handleEstimateSubmit} className="space-y-4 max-h-[65vh] overflow-y-auto pr-2">
+                            {/* Purpose & Work Type */}
+                            <div className="grid grid-cols-2 gap-3">
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-400 mb-1">Purpose</label>
+                                    <select
+                                        className="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2.5 text-white focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 outline-none transition-all"
+                                        value={estimateForm.purpose}
+                                        onChange={(e) => setEstimateForm({ ...estimateForm, purpose: e.target.value })}
+                                    >
+                                        <option value="" className="bg-gray-900">Select...</option>
+                                        <option value="repair" className="bg-gray-900">Repair</option>
+                                        <option value="replacement" className="bg-gray-900">Replacement</option>
+                                        <option value="new_installation" className="bg-gray-900">New Installation</option>
+                                        <option value="maintenance" className="bg-gray-900">Maintenance</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-400 mb-1">Work Type</label>
+                                    <select
+                                        className="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2.5 text-white focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 outline-none transition-all"
+                                        value={estimateForm.workType}
+                                        onChange={(e) => setEstimateForm({ ...estimateForm, workType: e.target.value })}
+                                    >
+                                        <option value="" className="bg-gray-900">Select...</option>
+                                        <option value="electrical" className="bg-gray-900">Electrical</option>
+                                        <option value="plumbing" className="bg-gray-900">Plumbing</option>
+                                        <option value="civil" className="bg-gray-900">Civil</option>
+                                        <option value="roads" className="bg-gray-900">Roads</option>
+                                        <option value="sanitation" className="bg-gray-900">Sanitation</option>
+                                        <option value="other" className="bg-gray-900">Other</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            {/* Timeline */}
                             <div>
-                                <label className="block text-sm font-medium text-gray-400 mb-1">Materials Cost ($)</label>
+                                <label className="block text-sm font-medium text-gray-400 mb-1">Estimated Timeline (days)</label>
                                 <input
                                     type="number"
-                                    required
-                                    min="0"
+                                    min="1"
                                     className="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2.5 text-white focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 outline-none transition-all"
-                                    value={estimateForm.materials}
-                                    onChange={(e) => setEstimateForm({ ...estimateForm, materials: e.target.value })}
+                                    value={estimateForm.timeline}
+                                    onChange={(e) => setEstimateForm({ ...estimateForm, timeline: e.target.value })}
+                                    placeholder="e.g. 7"
                                 />
                             </div>
+
+                            {/* Materials List */}
                             <div>
-                                <label className="block text-sm font-medium text-gray-400 mb-1">Labor Cost ($)</label>
-                                <input
-                                    type="number"
-                                    required
-                                    min="0"
-                                    className="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2.5 text-white focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 outline-none transition-all"
-                                    value={estimateForm.labor}
-                                    onChange={(e) => setEstimateForm({ ...estimateForm, labor: e.target.value })}
-                                />
+                                <label className="block text-sm font-medium text-gray-400 mb-2">Materials Breakdown</label>
+                                {estimateForm.materialsList.map((item, idx) => (
+                                    <div key={idx} className="flex gap-2 mb-2">
+                                        <input
+                                            type="text"
+                                            placeholder="Material name"
+                                            className="flex-1 bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-white text-sm focus:ring-2 focus:ring-indigo-500/50 outline-none"
+                                            value={item.name}
+                                            onChange={(e) => {
+                                                const list = [...estimateForm.materialsList];
+                                                list[idx].name = e.target.value;
+                                                setEstimateForm({ ...estimateForm, materialsList: list });
+                                            }}
+                                        />
+                                        <input
+                                            type="number"
+                                            placeholder="Cost"
+                                            min="0"
+                                            className="w-24 bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-white text-sm focus:ring-2 focus:ring-indigo-500/50 outline-none"
+                                            value={item.cost}
+                                            onChange={(e) => {
+                                                const list = [...estimateForm.materialsList];
+                                                list[idx].cost = e.target.value;
+                                                setEstimateForm({ ...estimateForm, materialsList: list });
+                                            }}
+                                        />
+                                        {estimateForm.materialsList.length > 1 && (
+                                            <button
+                                                type="button"
+                                                onClick={() => {
+                                                    const list = estimateForm.materialsList.filter((_, i) => i !== idx);
+                                                    setEstimateForm({ ...estimateForm, materialsList: list });
+                                                }}
+                                                className="text-red-400 hover:text-red-300 px-2"
+                                            >
+                                                ✕
+                                            </button>
+                                        )}
+                                    </div>
+                                ))}
+                                <button
+                                    type="button"
+                                    onClick={() => setEstimateForm({ ...estimateForm, materialsList: [...estimateForm.materialsList, { name: '', cost: '' }] })}
+                                    className="text-indigo-400 hover:text-indigo-300 text-sm font-medium mt-1"
+                                >
+                                    + Add Material
+                                </button>
                             </div>
-                            <div>
-                                <label className="block text-sm font-medium text-gray-400 mb-1">Equipment Cost ($)</label>
-                                <input
-                                    type="number"
-                                    required
-                                    min="0"
-                                    className="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2.5 text-white focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 outline-none transition-all"
-                                    value={estimateForm.equipment}
-                                    onChange={(e) => setEstimateForm({ ...estimateForm, equipment: e.target.value })}
-                                />
+
+                            <div className="border-t border-white/10 pt-4">
+                                <h4 className="text-sm font-bold text-gray-300 mb-3">Cost Summary</h4>
                             </div>
+
+                            <div className="grid grid-cols-3 gap-3">
+                                <div>
+                                    <label className="block text-xs font-medium text-gray-400 mb-1">Materials ($)</label>
+                                    <input
+                                        type="number"
+                                        required
+                                        min="0"
+                                        className="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2.5 text-white focus:ring-2 focus:ring-indigo-500/50 outline-none transition-all"
+                                        value={estimateForm.materials}
+                                        onChange={(e) => setEstimateForm({ ...estimateForm, materials: e.target.value })}
+                                    />
+                                </div>
+                                <div>
+                                    <label className="block text-xs font-medium text-gray-400 mb-1">Labor ($)</label>
+                                    <input
+                                        type="number"
+                                        required
+                                        min="0"
+                                        className="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2.5 text-white focus:ring-2 focus:ring-indigo-500/50 outline-none transition-all"
+                                        value={estimateForm.labor}
+                                        onChange={(e) => setEstimateForm({ ...estimateForm, labor: e.target.value })}
+                                    />
+                                </div>
+                                <div>
+                                    <label className="block text-xs font-medium text-gray-400 mb-1">Equipment ($)</label>
+                                    <input
+                                        type="number"
+                                        required
+                                        min="0"
+                                        className="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2.5 text-white focus:ring-2 focus:ring-indigo-500/50 outline-none transition-all"
+                                        value={estimateForm.equipment}
+                                        onChange={(e) => setEstimateForm({ ...estimateForm, equipment: e.target.value })}
+                                    />
+                                </div>
+                            </div>
+
+                            {/* Total Preview */}
+                            {(estimateForm.materials || estimateForm.labor || estimateForm.equipment) && (
+                                <div className="bg-indigo-500/10 border border-indigo-500/20 rounded-xl p-3 text-center">
+                                    <span className="text-sm text-gray-400">Total Estimate: </span>
+                                    <span className="text-xl font-bold text-indigo-400">
+                                        ${(Number(estimateForm.materials || 0) + Number(estimateForm.labor || 0) + Number(estimateForm.equipment || 0)).toLocaleString()}
+                                    </span>
+                                </div>
+                            )}
+
                             <div>
-                                <label className="block text-sm font-medium text-gray-400 mb-1">Description / Notes</label>
+                                <label className="block text-sm font-medium text-gray-400 mb-1">Additional Notes</label>
                                 <textarea
-                                    required
-                                    rows="3"
-                                    className="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2.5 text-white focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 outline-none transition-all resize-none"
+                                    rows="2"
+                                    className="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2.5 text-white focus:ring-2 focus:ring-indigo-500/50 outline-none transition-all resize-none"
                                     value={estimateForm.description}
                                     onChange={(e) => setEstimateForm({ ...estimateForm, description: e.target.value })}
                                     placeholder="Briefly describe the work required..."
