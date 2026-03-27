@@ -13,7 +13,12 @@ const ContractorList = () => {
     const fetchContractors = async () => {
         setLoading(true);
         try {
-            const data = await adminService.getContractors({ sortBy });
+            const adminCity = localStorage.getItem("city"); // or from auth
+
+            const data = await adminService.getContractors({
+                sortBy,
+                city: adminCity   // ✅ send city
+            });
             setContractors(data);
         } catch (error) {
             console.error('Failed to fetch contractors:', error);
