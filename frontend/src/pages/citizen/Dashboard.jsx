@@ -5,49 +5,59 @@ import { Link } from 'react-router-dom';
 import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
-import icon from 'leaflet/dist/images/marker-icon.png';
-import iconShadow from 'leaflet/dist/images/marker-shadow.png';
 
 import GlassCard from '../../components/common/GlassCard';
 import Button from '../../components/common/Button';
 import Loader from '../../components/common/Loader';
 import { dashboardService } from '../../api/services/dashboardService';
 import { issueService } from '../../api/services/issueService';
+import { useAuth } from '../../context/AuthContext';
+import { getCityCoords } from '../../utils/cityCoordinates';
 
+// Custom marker icons
+const createIcon = (color) => L.divIcon({
+    className: 'custom-marker',
+    html: `<div style="
+        width: 22px; height: 22px; border-radius: 50% 50% 50% 0;
+        background: ${color}; transform: rotate(-45deg);
+        border: 2px solid white; box-shadow: 0 2px 6px rgba(0,0,0,0.4);
+        display: flex; align-items: center; justify-content: center;
+    "><div style="width: 5px; height: 5px; background: white; border-radius: 50%; transform: rotate(45deg);"></div></div>`,
+    iconSize: [22, 22],
+    iconAnchor: [11, 22],
+    popupAnchor: [0, -22]
+});
 
-// import { useMap } from 'react-leaflet';
+const statusIcons = {
+    reported: createIcon('#f97316'),
+    assigned: createIcon('#3b82f6'),
+    in_progress: createIcon('#6366f1'),
+    resolved: createIcon('#22c55e'),
+    fund_approval_pending: createIcon('#f59e0b'),
+    critical: createIcon('#ef4444'),
+};
 
-const RecenterMap = ({ location }) => {
+const getMarkerIcon = (issue) => {
+    if (issue.priority === 'critical') return statusIcons.critical;
+    return statusIcons[issue.status] || createIcon('#6b7280');
+};
+
+// Map controller
+const RecenterMap = ({ location, zoom }) => {
     const map = useMap();
-
     useEffect(() => {
         if (location && location[0] && location[1]) {
-            map.setView(location, 12);
+            map.setView(location, zoom || 12);
         }
-    }, [location, map]);
-
+    }, [location, zoom, map]);
     return null;
 };
-
-// Helper component to recenter map when user location changes
-const RecenterAutomatically = ({ lat, lng }) => {
-    const map = useMap();
-    useEffect(() => {
-        map.setView([lat, lng]);
-    }, [lat, lng, map]);
-    return null;
-};
-
-// Fix Leaflet default icon
-let DefaultIcon = L.icon({
-    iconUrl: icon,
-    shadowUrl: iconShadow,
-    iconSize: [25, 41],
-    iconAnchor: [12, 41]
-});
-L.Marker.prototype.options.icon = DefaultIcon;
 
 const CitizenDashboard = () => {
+    const { user } = useAuth();
+    const userCity = user?.city || '';
+    const cityCoords = getCityCoords(userCity);
+
     const [stats, setStats] = useState({
         total: 0,
         pending: 0,
@@ -57,7 +67,8 @@ const CitizenDashboard = () => {
     const [recentIssues, setRecentIssues] = useState([]);
     const [nearbyIssues, setNearbyIssues] = useState([]);
     const [loading, setLoading] = useState(true);
-    const [userLocation, setUserLocation] = useState([20.5937, 78.9629]);
+    const [userLocation, setUserLocation] = useState([cityCoords.lat, cityCoords.lng]);
+    const [mapZoom, setMapZoom] = useState(cityCoords.zoom || 12);
     const [cityPulse, setCityPulse] = useState({ criticalIssues: 0, activeCitizens: 0, totalIssues: 0 });
 
     useEffect(() => {
@@ -78,8 +89,8 @@ const CitizenDashboard = () => {
                         const lat = position.coords.latitude;
                         const lng = position.coords.longitude;
                         setUserLocation([lat, lng]);
+                        setMapZoom(13);
 
-                        // Fetch issues for this location
                         try {
                             const mapIssues = await issueService.getAll({ lat, lng });
                             setNearbyIssues(mapIssues);
@@ -88,12 +99,12 @@ const CitizenDashboard = () => {
                             console.error("Failed to fetch map issues", err);
                         }
                     },
-                    async (error) => {
-                        console.error("Error getting location", error);
-                        // Default fallback
-                        setUserLocation([20.5937, 78.9629]);
+                    async () => {
+                        // Fallback to city center
+                        setUserLocation([cityCoords.lat, cityCoords.lng]);
+                        setMapZoom(cityCoords.zoom || 12);
                         try {
-                            const mapIssues = await issueService.getAll(); // Fallback to profile city
+                            const mapIssues = await issueService.getAll();
                             setNearbyIssues(mapIssues);
                             updateCityPulse(mapIssues);
                         } catch (err) {
@@ -209,25 +220,34 @@ const CitizenDashboard = () => {
                             {userLocation && (
                                 <MapContainer
                                     center={userLocation}
-                                    zoom={12}
+                                    zoom={mapZoom}
                                     className="h-full w-full"
                                     style={{ height: '100%', width: '100%', minHeight: '300px' }}
                                 >
-                                    <RecenterAutomatically lat={userLocation[0]} lng={userLocation[1]} />
+                                    <RecenterMap location={userLocation} zoom={mapZoom} />
                                     <TileLayer
-                                        url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
-                                        attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>'
+                                        url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                                        attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
                                     />
                                     {nearbyIssues.map(issue => (
                                         issue.gps && issue.gps.lat && issue.gps.lng && (
                                             <Marker
                                                 key={issue._id}
                                                 position={[issue.gps.lat, issue.gps.lng]}
+                                                icon={getMarkerIcon(issue)}
                                             >
                                                 <Popup>
-                                                    <div className="text-gray-900">
-                                                        <strong>{issue.title}</strong><br />
-                                                        Status: {issue.status}
+                                                    <div style={{ minWidth: '180px', fontFamily: 'system-ui' }}>
+                                                        <h3 style={{ fontWeight: 700, fontSize: '13px', color: '#1e293b', marginBottom: '4px' }}>{issue.title}</h3>
+                                                        <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '11px' }}>
+                                                            <span style={{ padding: '1px 6px', borderRadius: '4px', fontWeight: 700, textTransform: 'uppercase', background: '#dbeafe', color: '#1e40af' }}>
+                                                                {issue.status?.replace(/_/g, ' ')}
+                                                            </span>
+                                                            <span style={{ color: '#6b7280' }}>👍 {issue.upvotes || 0}</span>
+                                                        </div>
+                                                        <a href={`/citizen/issue/${issue._id}`} style={{ display: 'block', textAlign: 'center', fontSize: '11px', fontWeight: 700, color: '#4f46e5', marginTop: '6px', borderTop: '1px solid #e5e7eb', paddingTop: '4px' }}>
+                                                            View Details →
+                                                        </a>
                                                     </div>
                                                 </Popup>
                                             </Marker>

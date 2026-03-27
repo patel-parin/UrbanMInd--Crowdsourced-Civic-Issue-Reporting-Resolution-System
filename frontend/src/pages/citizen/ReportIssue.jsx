@@ -1,8 +1,9 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Camera, MapPin, Upload, X, AlertTriangle, Mic, Square, Plus, Trash2 } from 'lucide-react';
+import { Camera, MapPin, Upload, X, AlertTriangle, Mic, Square, Plus, Trash2, Search } from 'lucide-react';
 import toast from 'react-hot-toast';
+import { Link } from 'react-router-dom';
 import Button from '../../components/common/Button';
 import Input from '../../components/common/Input';
 import GlassCard from '../../components/common/GlassCard';
@@ -32,6 +33,9 @@ const ReportIssue = () => {
 
     const [loading, setLoading] = useState(false);
     const [locationLoading, setLocationLoading] = useState(false);
+    const [duplicates, setDuplicates] = useState([]);
+    const [checkingDuplicates, setCheckingDuplicates] = useState(false);
+    const dupTimerRef = useRef(null);
 
     const categories = [
         { value: "pothole", label: "Pothole" },
@@ -50,6 +54,31 @@ const ReportIssue = () => {
 
     const handleChange = (e) => {
         setFormData({ ...formData, [e.target.name]: e.target.value });
+        
+        // Duplicate detection on title change
+        if (e.target.name === 'title') {
+            const title = e.target.value;
+            if (dupTimerRef.current) clearTimeout(dupTimerRef.current);
+            if (title.length >= 5) {
+                dupTimerRef.current = setTimeout(async () => {
+                    setCheckingDuplicates(true);
+                    try {
+                        const result = await issueService.checkDuplicates(
+                            title,
+                            formData.lat || undefined,
+                            formData.lng || undefined
+                        );
+                        setDuplicates(result.duplicates || []);
+                    } catch (err) {
+                        console.error('Duplicate check failed:', err);
+                    } finally {
+                        setCheckingDuplicates(false);
+                    }
+                }, 600);
+            } else {
+                setDuplicates([]);
+            }
+        }
     };
 
     const handleImageChange = (e) => {
@@ -223,6 +252,43 @@ const ReportIssue = () => {
                             required
                             className="bg-white/5 border-white/10 focus:border-indigo-500/50 focus:bg-white/10 transition-all duration-300"
                         />
+                        {/* Duplicate Detection Alert */}
+                        {checkingDuplicates && (
+                            <div className="flex items-center gap-2 text-xs text-gray-500 px-2">
+                                <Search className="w-3 h-3 animate-spin" /> Checking for similar issues...
+                            </div>
+                        )}
+                        {duplicates.length > 0 && (
+                            <motion.div
+                                initial={{ opacity: 0, height: 0 }}
+                                animate={{ opacity: 1, height: 'auto' }}
+                                className="p-4 rounded-xl bg-amber-500/10 border border-amber-500/20 space-y-3"
+                            >
+                                <div className="flex items-center gap-2 text-amber-400 text-sm font-bold">
+                                    <AlertTriangle className="w-4 h-4" />
+                                    Similar issues found! Consider upvoting instead.
+                                </div>
+                                <div className="space-y-2">
+                                    {duplicates.slice(0, 3).map(dup => (
+                                        <Link
+                                            key={dup._id}
+                                            to={`/citizen/issue/${dup._id}`}
+                                            className="flex items-center justify-between p-3 rounded-lg bg-white/5 hover:bg-white/10 border border-white/5 hover:border-indigo-500/20 transition-all group"
+                                        >
+                                            <div className="flex-1 min-w-0">
+                                                <p className="text-white text-sm font-medium group-hover:text-indigo-300 truncate">{dup.title}</p>
+                                                <div className="flex items-center gap-2 mt-1">
+                                                    <span className="text-xs text-gray-500">{dup.city || 'Unknown'}</span>
+                                                    <span className="text-xs px-1.5 py-0.5 rounded bg-indigo-500/10 text-indigo-400">{dup.similarityScore}% match</span>
+                                                    <span className="text-xs text-gray-500">👍 {dup.upvotes || 0}</span>
+                                                </div>
+                                            </div>
+                                            <span className="text-xs text-indigo-400 font-bold ml-2 shrink-0 group-hover:underline">View & Upvote →</span>
+                                        </Link>
+                                    ))}
+                                </div>
+                            </motion.div>
+                        )}
                     </div>
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
