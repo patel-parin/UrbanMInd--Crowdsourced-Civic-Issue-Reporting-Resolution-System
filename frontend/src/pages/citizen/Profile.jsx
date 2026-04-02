@@ -3,6 +3,7 @@ import { useAuth } from "../../context/AuthContext";
 import Card from "../../components/common/Card";
 import Button from "../../components/common/Button";
 import Loader from "../../components/common/Loader";
+import Skeleton from "../../components/common/Skeleton";
 import { User, Mail, Phone, MapPin, Award } from "lucide-react";
 import { authService } from "../../api/services/authService";
 
@@ -32,8 +33,18 @@ const Profile = () => {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center h-64">
-        <Loader size="lg" color="blue" />
+      <div className="max-w-4xl mx-auto animate-pulse">
+        <div className="mb-8">
+          <Skeleton className="h-8 w-48 mb-2" />
+          <Skeleton className="h-4 w-96" />
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <Skeleton className="h-[400px] rounded-2xl col-span-1" />
+          <div className="col-span-2 space-y-6">
+            <Skeleton className="h-64 rounded-2xl" />
+            <Skeleton className="h-48 rounded-2xl" />
+          </div>
+        </div>
       </div>
     );
   }
@@ -142,9 +153,8 @@ const Profile = () => {
                   <div
                     className="h-full bg-blue-600"
                     style={{
-                      width: `${
-                        ((profile?.impactPoints || 0) % 100)
-                      }%`,
+                      width: `${((profile?.impactPoints || 0) % 100)
+                        }%`,
                     }}
                   ></div>
                 </div>

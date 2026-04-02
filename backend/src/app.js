@@ -14,6 +14,7 @@ import issueRoutes from "./routes/issue.routes.js";
 import adminRoutes from "./routes/admin.routes.js";
 import contractorRoutes from "./routes/contractor.routes.js";
 import dashboardRoutes from "./routes/dashboard.routes.js";
+import gamificationRoutes from "./routes/gamification.routes.js";
 
 const app = express();
 
@@ -46,6 +47,7 @@ app.use("/api/issue", issueRoutes);
 app.use("/api/admin", adminRoutes);
 app.use("/api/contractor", contractorRoutes);
 app.use("/api/dashboard", dashboardRoutes);
+app.use("/api/gamification", gamificationRoutes);
 
 app.get("/", (req, res) => {
   res.send("UrbanMind Backend Running...");

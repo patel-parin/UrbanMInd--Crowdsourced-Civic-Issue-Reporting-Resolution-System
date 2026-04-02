@@ -1,5 +1,4 @@
 import User from "../models/User.js";
-import Contractor from "../models/Contractor.js";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import keys from "../config/keys.js";
@@ -9,7 +8,7 @@ const SUPER_ADMIN_PASSWORD = process.env.SUPER_ADMIN_PASSWORD || "admin123";
 
 export const register = async (req, res) => {
   try {
-    const { name, email, password, role } = req.body;
+    const { name, email, password, role, city, state, district, taluka } = req.body;
 
     // Prevent self-registration of admin or superadmin
     if (role === "admin" || role === "superadmin") {
@@ -23,18 +22,21 @@ export const register = async (req, res) => {
       email,
       password: hashed,
       role: role || "citizen",
-    });
-
-    if (role === "contractor") {
-      await Contractor.create({
-        companyName: name,
-        userId: user._id,
+      city: city || "Unknown",
+      state,
+      district,
+      taluka,
+      // Initialize contractor fields if role is contractor
+      ...(role === 'contractor' && {
+        companyName: name, // Default company name to user name
         rating: 0,
         completedTasks: 0,
         efficiency: 0,
         costPerTask: 0
-      });
-    }
+      })
+    });
+
+    // No need to create separate Contractor document anymore
 
     res.json({ message: "User Registered", user });
   } catch (err) {
@@ -76,10 +78,14 @@ export const login = async (req, res) => {
     if (!match) return res.json({ message: "Incorrect Password" });
 
     const token = jwt.sign(
-      { id: user._id, role: user.role },
-      keys.jwtSecret,
-      { expiresIn: "7d" }
-    );
+  { 
+    id: user._id, 
+    role: user.role,
+    city: user.city   // 🔥 ADD THIS
+  },
+  keys.jwtSecret,
+  { expiresIn: "7d" }
+);
 
     res.json({ message: "Login Successful", token, user });
   } catch (err) {
@@ -90,7 +96,7 @@ export const login = async (req, res) => {
 // Only Super Admin can call this
 export const createAdmin = async (req, res) => {
   try {
-    const { name, email, password, city } = req.body;
+    const { name, email, password, city, state, district, taluka } = req.body;
 
     const existingUser = await User.findOne({ email });
     if (existingUser) return res.status(400).json({ message: "User already exists" });
@@ -102,7 +108,10 @@ export const createAdmin = async (req, res) => {
       email,
       password: hashed,
       role: "admin",
-      city: city // Assign city to this admin
+      city: city, // Assign city to this admin
+      state,
+      district,
+      taluka
     });
 
     res.json({ message: "City Admin Created Successfully", admin: newAdmin });

@@ -13,27 +13,47 @@ export const AuthProvider = ({ children }) => {
     const navigate = useNavigate();
 
     useEffect(() => {
-        const checkAuth = async () => {
-            const token = localStorage.getItem('token');
-            const savedUser = localStorage.getItem('user');
+    const checkAuth = () => {
+        const token = localStorage.getItem("token");
+        const rawUser = localStorage.getItem("user");
 
-            if (token && savedUser) {
-                setUser(JSON.parse(savedUser));
-                // Optional: Verify token with backend
-            }
+        // If no token → user is logged out
+        if (!token || !rawUser || rawUser === "undefined" || rawUser === "null") {
+            setUser(null);
             setLoading(false);
-        };
-        checkAuth();
-    }, []);
+            return;
+        }
+
+        try {
+            const parsedUser = JSON.parse(rawUser);
+            setUser(parsedUser);
+        } catch (error) {
+            console.error("Invalid user JSON:", error);
+            // Clear corrupted data
+            localStorage.removeItem("user");
+            setUser(null);
+        }
+
+        setLoading(false);
+    };
+
+    checkAuth();
+}, []);
+
 
     const login = async (email, password) => {
+          localStorage.removeItem("token");
+  localStorage.removeItem("user");
+  localStorage.removeItem("city"); 
         try {
             const response = await api.post('/auth/login', { email, password });
             const { token, user } = response.data;
 
             localStorage.setItem('token', token);
             localStorage.setItem('user', JSON.stringify(user));
+            localStorage.setItem('city', user.city); 
             setUser(user);
+            console.log("LOGIN USER:", user); 
 
             toast.success('Login successful!');
 
@@ -63,6 +83,7 @@ export const AuthProvider = ({ children }) => {
     };
 
     const register = async (userData) => {
+        localStorage.removeItem("token");
         try {
             const response = await api.post('/auth/register', userData);
             toast.success('Registration successful! Please login.');
@@ -78,6 +99,7 @@ export const AuthProvider = ({ children }) => {
     const logout = () => {
         localStorage.removeItem('token');
         localStorage.removeItem('user');
+        localStorage.removeItem('city');
         setUser(null);
         navigate('/login');
         toast.success('Logged out successfully');

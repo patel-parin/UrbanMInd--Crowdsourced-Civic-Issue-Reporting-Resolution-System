@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { BarChart, PieChart, Activity, TrendingUp } from 'lucide-react';
+import { BarChart, PieChart, Activity, TrendingUp, DollarSign, FileText } from 'lucide-react';
 import Card from '../../components/common/Card';
 import Loader from '../../components/common/Loader';
 import { issueService } from '../../api/services/issueService';
@@ -11,6 +11,7 @@ const Analytics = () => {
         pending: 0,
         resolved: 0,
         inProgress: 0,
+        funds: 0,
         byCategory: {}
     });
 
@@ -21,7 +22,7 @@ const Analytics = () => {
 
                 // Calculate Stats
                 const total = issues.length;
-                const pending = issues.filter(i => i.status === 'pending').length;
+                const pending = issues.filter(i => ['reported', 'assigned', 'under_contractor_survey', 'under_contractor', 'fund_approval_pending'].includes(i.status)).length;
                 const resolved = issues.filter(i => i.status === 'resolved').length;
                 const inProgress = issues.filter(i => i.status === 'in_progress').length;
 
@@ -30,7 +31,9 @@ const Analytics = () => {
                     return acc;
                 }, {});
 
-                setStats({ total, pending, resolved, inProgress, byCategory });
+                const funds = issues.reduce((acc, curr) => acc + (curr.fundAmount || 0), 0);
+
+                setStats({ total, pending, resolved, inProgress, funds, byCategory });
             } catch (error) {
                 console.error('Failed to load analytics data:', error);
             } finally {
@@ -49,6 +52,37 @@ const Analytics = () => {
             <div className="mb-8">
                 <h1 className="text-3xl font-bold text-white mb-2">Analytics Dashboard</h1>
                 <p className="text-gray-400">Real-time insights into urban issues.</p>
+            </div>
+
+            <div className="flex justify-end mb-6">
+                <button
+                    onClick={() => {
+                        const headers = ["Metric", "Value"];
+                        const csvContent = [
+                            headers.join(","),
+                            `Total Issues,${stats.total}`,
+                            `Pending Issues,${stats.pending}`,
+                            `In Progress,${stats.inProgress}`,
+                            `Resolved,${stats.resolved}`,
+                            `Total Funds Requested,$${stats.funds}`,
+                            ...Object.entries(stats.byCategory).map(([k, v]) => `Category: ${k},${v}`)
+                        ].join("\n");
+
+                        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+                        const link = document.createElement("a");
+                        const url = URL.createObjectURL(blob);
+                        link.setAttribute("href", url);
+                        link.setAttribute("download", "analytics_report.csv");
+                        link.style.visibility = 'hidden';
+                        document.body.appendChild(link);
+                        link.click();
+                        document.body.removeChild(link);
+                    }}
+                    className="flex items-center gap-2 px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl transition-colors shadow-lg shadow-indigo-500/20"
+                >
+                    <FileText className="w-4 h-4" />
+                    <span>Generate Report</span>
+                </button>
             </div>
 
             {/* Key Metrics */}
@@ -97,6 +131,18 @@ const Analytics = () => {
                         </div>
                     </div>
                 </Card>
+
+                <Card className="bg-linear-to-br from-emerald-900/50 to-slate-900 border-emerald-500/30">
+                    <div className="flex items-center gap-4">
+                        <div className="p-3 bg-emerald-500/20 rounded-xl text-emerald-400">
+                            <DollarSign className="w-6 h-6" />
+                        </div>
+                        <div>
+                            <p className="text-gray-400 text-sm">Total Funds</p>
+                            <h3 className="text-3xl font-bold text-white">${stats.funds}</h3>
+                        </div>
+                    </div>
+                </Card>
             </div>
 
             {/* Category Breakdown Chart */}
@@ -140,7 +186,7 @@ const Analytics = () => {
                     </p>
                 </Card>
             </div>
-        </div>
+        </div >
     );
 };
 

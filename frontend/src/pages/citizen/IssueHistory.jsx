@@ -68,11 +68,10 @@ const IssueHistory = () => {
                         <button
                             key={status}
                             onClick={() => setFilter(status)}
-                            className={`px-4 py-2 rounded-xl text-sm font-medium whitespace-nowrap transition-colors ${
-                                filter === status
+                            className={`px-4 py-2 rounded-xl text-sm font-medium whitespace-nowrap transition-colors ${filter === status
                                     ? 'bg-blue-600 text-white'
                                     : 'bg-gray-800 text-gray-400 hover:bg-gray-700 hover:text-white'
-                            }`}
+                                }`}
                         >
                             {status.replace('_', ' ').charAt(0).toUpperCase() + status.slice(1).replace('_', ' ')}
                         </button>
@@ -94,7 +93,7 @@ const IssueHistory = () => {
 
                                 <div className="h-48 overflow-hidden relative">
                                     <img
-                                        src={`${import.meta.env.VITE_API_URL}${issue.imageUrl}`}
+                                        src={issue.images && issue.images.length > 0 ? `${import.meta.env.VITE_API_URL}${issue.images[0]}` : "https://images.unsplash.com/photo-1515162816999-a0c47dc192f7?auto=format&fit=crop&q=80&w=400"}
                                         alt={issue.title}
                                         className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
                                         onError={(e) => {
@@ -104,13 +103,12 @@ const IssueHistory = () => {
                                     />
                                     <div className="absolute top-3 right-3">
                                         <span
-                                            className={`px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider backdrop-blur-md ${
-                                                issue.status === "resolved"
+                                            className={`px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider backdrop-blur-md ${issue.status === "resolved"
                                                     ? "bg-green-500/80 text-white"
                                                     : issue.status === "pending"
-                                                    ? "bg-orange-500/80 text-white"
-                                                    : "bg-blue-500/80 text-white"
-                                            }`}
+                                                        ? "bg-orange-500/80 text-white"
+                                                        : "bg-blue-500/80 text-white"
+                                                }`}
                                         >
                                             {issue.status}
                                         </span>

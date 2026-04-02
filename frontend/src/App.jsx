@@ -8,12 +8,15 @@ import ProtectedRoute from './components/common/ProtectedRoute';
 import Login from './pages/auth/Login';
 import Register from './pages/auth/Register';
 import RoleSelect from './pages/auth/RoleSelect';
+import Landing from './pages/Landing';
 
 import CitizenDashboard from './pages/citizen/Dashboard';
 import ReportIssue from './pages/citizen/ReportIssue';
 import IssueHistory from './pages/citizen/IssueHistory';
 import IssueDetails from './pages/citizen/IssueDetails';
 import MapView from './pages/citizen/MapView';
+import NearbyIssues from './pages/citizen/NearbyIssues';
+import Leaderboard from './pages/citizen/Leaderboard';
 import Profile from './pages/citizen/Profile';
 import Layout from './components/layout/Layout';
 
@@ -26,18 +29,21 @@ import SuperAdminDashboard from './pages/admin/SuperAdminDashboard';
 import ContractorDashboard from './pages/contractor/Dashboard';
 import CompletedTasks from './pages/contractor/CompletedTasks';
 
+import ParticleBackground from './components/ParticleBackground';
+
 function App() {
   return (
     <Router>
       <AuthProvider>
-        <div className="min-h-screen text-white font-sans">
+        <ParticleBackground />
+        <div className="min-h-screen text-white font-sans relative z-10">
           <Toaster position="top-right" />
           <Routes>
             {/* Public Routes */}
+            <Route path="/" element={<Landing />} />
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
             <Route path="/role-select" element={<RoleSelect />} />
-            <Route path="/" element={<Navigate to="/role-select" replace />} />
 
             {/* Citizen Routes */}
             <Route
@@ -51,6 +57,8 @@ function App() {
                       <Route path="history" element={<IssueHistory />} />
                       <Route path="issue/:id" element={<IssueDetails />} />
                       <Route path="map" element={<MapView />} />
+                      <Route path="nearby" element={<NearbyIssues />} />
+                      <Route path="leaderboard" element={<Leaderboard />} />
                       <Route path="profile" element={<Profile />} />
                       <Route path="*" element={<Navigate to="dashboard" replace />} />
                     </Routes>

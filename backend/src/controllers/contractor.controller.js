@@ -1,26 +1,8 @@
-import Contractor from "../models/Contractor.js";
 import Issue from "../models/Issue.js";
 import User from "../models/User.js";
-import Assignment from "../models/Assignment.js";
 
 export const getAllContractors = async (req, res) => {
   try {
-    // Self-healing: Ensure all users with role 'contractor' have a Contractor document
-    const contractorUsers = await User.find({ role: "contractor" });
-    for (const user of contractorUsers) {
-      const exists = await Contractor.findOne({ userId: user._id });
-      if (!exists) {
-        await Contractor.create({
-          companyName: user.name,
-          userId: user._id,
-          rating: 0,
-          completedTasks: 0,
-          efficiency: 0,
-          costPerTask: 0
-        });
-      }
-    }
-
     const { sortBy } = req.query;
     let sortOptions = {};
 
@@ -29,8 +11,8 @@ export const getAllContractors = async (req, res) => {
     else if (sortBy === "cost") sortOptions = { costPerTask: 1 };
     else sortOptions = { createdAt: -1 };
 
-    const contractors = await Contractor.find()
-      .populate("userId", "name email")
+    const contractors = await User.find({ role: "contractor" })
+      .select("-password") // Exclude password
       .sort(sortOptions);
 
     res.json(contractors);
@@ -41,12 +23,15 @@ export const getAllContractors = async (req, res) => {
 
 export const getAssignedTasks = async (req, res) => {
   try {
-    const contractor = await Contractor.findOne({ userId: req.user.id });
-    if (!contractor) {
+    const contractor = await User.findById(req.user.id);
+    if (!contractor || contractor.role !== 'contractor') {
       return res.status(404).json({ message: "Contractor profile not found" });
     }
 
-    const tasks = await Issue.find({ contractorId: contractor._id }).sort({ createdAt: -1 });
+    // Return tasks specifically assigned to this contractor
+    const query = { contractorId: contractor._id };
+
+    const tasks = await Issue.find(query).sort({ createdAt: -1 });
     res.json(tasks);
   } catch (err) {
     res.status(500).json({ error: err.message });
@@ -64,7 +49,7 @@ export const updateTaskStatus = async (req, res) => {
     );
 
     if (status === 'resolved') {
-      const contractor = await Contractor.findOne({ _id: updatedIssue.contractorId });
+      const contractor = await User.findById(updatedIssue.contractorId);
 
       if (contractor) {
         // Recalculate metrics
@@ -80,12 +65,10 @@ export const updateTaskStatus = async (req, res) => {
         contractor.completedTasks = totalTasks;
         contractor.costPerTask = totalTasks > 0 ? Math.round(totalEarnings / totalTasks) : 0;
 
-        // Simulate Rating (4.0 - 5.0) and Efficiency (85% - 100%) for demo purposes
-        // In a real app, these would come from user reviews and time tracking
+        // Simulate Rating (4.0 - 5.0) and Efficiency (85% - 100%) for demo
         const newRating = (Math.random() * (5.0 - 4.0) + 4.0).toFixed(1);
         const newEfficiency = Math.floor(Math.random() * (100 - 85) + 85);
 
-        // Weighted average for smoother updates (optional, but let's just set it for now to show immediate change)
         contractor.rating = parseFloat(newRating);
         contractor.efficiency = newEfficiency;
 
@@ -102,7 +85,7 @@ export const updateTaskStatus = async (req, res) => {
 
 export const getContractorProfile = async (req, res) => {
   try {
-    const contractor = await Contractor.findOne({ userId: req.user.id }).populate('userId', 'name email');
+    const contractor = await User.findById(req.user.id).select("-password");
     if (!contractor) {
       return res.status(404).json({ message: "Contractor profile not found" });
     }

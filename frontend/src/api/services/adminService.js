@@ -12,8 +12,8 @@ export const adminService = {
     return res.data;
   },
 
-  getContractors: async () => {
-    const res = await api.get("/admin/contractors");
+  getContractors: async (params) => {
+    const res = await api.get("/admin/contractors", { params });
     return res.data;
   },
 
